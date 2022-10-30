@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/ICONS">
+        <file>ICONS/FH_icon.png</file>
+        <file>ICONS/MODBUS_icon.png</file>
+        <file>ICONS/PH_icon.png</file>
+        <file>ICONS/RS485_icon.png</file>
+        <file>ICONS/SAVE_icon.png</file>
+        <file>ICONS/SAVEAS_icon.png</file>
+        <file>ICONS/UPLOAD_icon.png</file>
+    </qresource>
+</RCC>
