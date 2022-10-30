@@ -1,12 +1,10 @@
 #include "profileheat.h"
 #include "ui_profileheat.h"
+#include <QDataStream>
 
 ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), ui(new Ui::ProfileHeat){
     ui->setupUi(this);
 
-    if (!(from_file.isEmpty())){
-
-    }
 
     ui->pushbutton_addpoint->setEnabled(false);
     ui->pushbutton_clearpoints->setEnabled(false);
@@ -37,6 +35,44 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
     ui->widget_profileplot->xAxis->setLabel("Time, s");
     ui->widget_profileplot->yAxis->setLabel("Temperature, C");
     ui->widget_profileplot->addGraph()->setPen(QPen(Qt::red));
+
+    if (!(from_file.isEmpty())){
+        QFile file(from_file);
+        if (file.open(QIODevice::ReadOnly)){
+            QDataStream stream(&file);
+            int data_count;
+            double key, value;
+            stream >> data_count;
+            if (data_count){
+                stream >> key;
+                stream >> value;
+                ui->widget_profileplot->graph(0)->addData(key, value);
+                ui->lineedit_starttemp->setText(QString::asprintf("%.2f", value));
+                ui->lineedit_starttemp->setEnabled(false);
+                ui->pushbutton_setstarttemp->setEnabled(false);
+                ui->lineedit_pointtemp->setEnabled(true);
+                ui->lineedit_pointtemp->setText("");
+                ui->lineedit_pointspeed->setEnabled(true);
+                ui->lineedit_pointspeed->setText("");
+                ui->pushbutton_addpoint->setEnabled(true);
+                ui->pushbutton_clearpoints->setEnabled(true);
+                ui->pushbutton_removepoint->setEnabled(true);
+                ui->pushbutton_run->setEnabled(true);
+                ui->pushbutton_stop->setEnabled(false);
+                data_count--;
+                while(data_count--){
+                    stream >> key;
+                    stream >> value;
+                    ui->widget_profileplot->graph(0)->addData(key, value);
+                }
+            }
+            ui->widget_profileplot->rescaleAxes();
+            ui->widget_profileplot->xAxis->setRangeLower(0);
+            ui->widget_profileplot->yAxis->setRangeLower(0);
+            ui->widget_profileplot->replot();
+            file.close();
+        }
+    }
 
     ui->widget_realplot->xAxis->setLabel("Time, s");
     ui->widget_realplot->yAxis->setLabel("Temperature, C");
@@ -316,5 +352,14 @@ void ProfileHeat::slClearProfile(void){
 }
 
 void ProfileHeat::SaveExperiment(QString filename){
-
+    QFile file(filename);
+    if (file.open(QIODevice::WriteOnly)){
+        QDataStream stream(&file);
+        stream << ui->widget_profileplot->graph(0)->dataCount();
+        QSharedPointer<QCPGraphDataContainer> tmp_data = ui->widget_profileplot->graph(0)->data();
+        for (auto iter = tmp_data->begin(); iter != tmp_data->end(); iter++){
+            stream << iter->key << iter->value;
+        }
+        file.close();
+    }
 }

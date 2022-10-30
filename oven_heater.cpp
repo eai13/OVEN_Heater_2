@@ -5,6 +5,8 @@ OVEN_Heater::OVEN_Heater(QWidget *parent) : QMainWindow(parent), ui(new Ui::OVEN
 
     connect(ui->action_fast_heating, &QAction::toggled, this, &OVEN_Heater::slSwitchToFastHeat);
     connect(ui->action_profile_heating, &QAction::toggled, this, &OVEN_Heater::slSwitchToProfileHeat);
+    connect(ui->action_save_experiment_as, &QAction::triggered, this, &OVEN_Heater::slSaveExperiment);
+    connect(ui->action_load_experiment, &QAction::triggered, this, &OVEN_Heater::slUploadExperiment);
 
     ui->action_profile_heating->setIcon(QIcon(":/ICONS/ICONS/PH_icon.png"));
     ui->action_fast_heating->setIcon(   QIcon(":/ICONS/ICONS/FH_icon.png"));
@@ -36,6 +38,7 @@ void OVEN_Heater::slSwitchToFastHeat(bool state){
         this->profile_heat = nullptr;
     }
     this->fast_heat = new FastHeat;
+    this->filename = "";
     ui->verticalLayout->addWidget(this->fast_heat, 0);
 }
 
@@ -47,7 +50,11 @@ void OVEN_Heater::slSwitchToProfileHeat(bool state){
         delete this->fast_heat;
         this->fast_heat = nullptr;
     }
-    this->profile_heat = new ProfileHeat;
+    if (this->profile_heat != nullptr){
+        ui->verticalLayout->removeWidget(this->profile_heat);
+        delete this->profile_heat;
+    }
+    this->profile_heat = new ProfileHeat(this->filename);
     ui->verticalLayout->addWidget(this->profile_heat, 0);
 }
 
@@ -73,7 +80,8 @@ void OVEN_Heater::slUploadExperiment(void){
     if (fname.isEmpty()) return;
 
     this->filename = fname;
-    if (this->profile_heat != nullptr) delete this->profile_heat;
-    if (this->fast_heat != nullptr) delete this->fast_heat;
-    this->profile_heat = new ProfileHeat(fname);
+    if (ui->action_profile_heating->isChecked())
+        this->slSwitchToProfileHeat(true);
+    else
+        ui->action_profile_heating->setChecked(true);
 }
