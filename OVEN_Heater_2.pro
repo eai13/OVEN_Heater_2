@@ -11,20 +11,26 @@ CONFIG += c++11
 SOURCES += \
     fastheat.cpp \
     main.cpp \
+    modbus_settings.cpp \
     oven_heater.cpp \
     profileheat.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    serial_settings.cpp
 
 HEADERS += \
     fastheat.h \
+    modbus_settings.h \
     oven_heater.h \
     profileheat.h \
-    qcustomplot.h
+    qcustomplot.h \
+    serial_settings.h
 
 FORMS += \
     fastheat.ui \
+    modbus_settings.ui \
     oven_heater.ui \
-    profileheat.ui
+    profileheat.ui \
+    serial_settings.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

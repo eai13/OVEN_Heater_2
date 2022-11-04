@@ -12,7 +12,9 @@
 #include <QFileDialog>
 
 QT_BEGIN_NAMESPACE
-namespace Ui { class OVEN_Heater; }
+namespace Ui {
+    class OVEN_Heater;
+}
 QT_END_NAMESPACE
 
 class OVEN_Heater : public QMainWindow
@@ -24,6 +26,15 @@ public:
     ~OVEN_Heater();
 
 private:
+
+    uint8_t slave_addr;
+    uint16_t temperature_addr;
+    uint16_t relay_addr;
+    uint16_t pid_addr;
+    uint16_t enable_addr;
+
+    uint32_t baudrate;
+
     QString filename = "";
 
     QWidget * handle_widget = nullptr;
@@ -36,5 +47,14 @@ private slots:
     void slUploadExperiment(void);
     void slSwitchToFastHeat(bool state);
     void slSwitchToProfileHeat(bool state);
+
+    void slShowMODBUSConfig(void);
+    void slSaveMODBUSParameters(uint8_t address, uint16_t tempaddr, uint16_t relayaddr, uint16_t pidaddr, uint16_t enanbleaddr);
+    void slShowSerialConfig(void);
+    void slSaveSerialParameters(uint32_t baud);
+
+    void slStarted(void);
+    void slStopped(void);
 };
+
 #endif // OVEN_HEATER_H

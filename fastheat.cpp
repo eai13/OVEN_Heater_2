@@ -1,8 +1,41 @@
 #include "fastheat.h"
 #include "ui_fastheat.h"
+#include <QDoubleValidator>
+#include "qglobal.h"
+
+void FastHeat::GUISetEnabled(GUI_ENABLE_STATE state){
+    switch(state){
+    case(GUI_ENABLE_STATE::ENB_STOP):{
+        ui->lineedit_setpoint->setEnabled(true);
+        ui->pushbutton_run->setEnabled(true);
+        ui->pushbutton_stop->setEnabled(false);
+        this->SetRunningLabel(false);
+        break;
+    }
+    case(GUI_ENABLE_STATE::ENB_RUN):{
+        ui->lineedit_setpoint->setEnabled(false);
+        ui->pushbutton_run->setEnabled(false);
+        ui->pushbutton_stop->setEnabled(true);
+        this->SetRunningLabel(true);
+        ui->widget_realplot->graph(0)->data()->clear();
+        ui->widget_realplot->rescaleAxes();
+        ui->widget_realplot->xAxis->setRangeLower(0);
+        ui->widget_realplot->yAxis->setRangeLower(0);
+        ui->widget_realplot->replot();
+        break;
+    }
+    default:{
+        break;
+    }
+    }
+}
 
 FastHeat::FastHeat(QWidget *parent) : QWidget(parent), ui(new Ui::FastHeat){
     ui->setupUi(this);
+
+    ui->lineedit_setpoint->setValidator(new QDoubleValidator(0, 1000, 2));
+
+    this->GUISetEnabled(GUI_ENABLE_STATE::ENB_STOP);
 
     this->plot_menu = new QMenu;
     this->plot_menu->addAction("Save Image", this, &FastHeat::slSaveImage);
@@ -17,13 +50,12 @@ FastHeat::FastHeat(QWidget *parent) : QWidget(parent), ui(new Ui::FastHeat){
     ui->widget_realplot->xAxis->setLabel("Time, s");
     ui->widget_realplot->yAxis->setLabel("Temperature, C");
     ui->widget_realplot->addGraph()->setPen(QPen(Qt::red));
-    ui->widget_realplot->graph(0)->addData(1, 1);
-    ui->widget_realplot->graph(0)->addData(2, 4);
-    ui->widget_realplot->graph(0)->addData(3, 9);
     ui->widget_realplot->rescaleAxes();
+    ui->widget_realplot->xAxis->setRangeLower(0);
+    ui->widget_realplot->yAxis->setRangeLower(0);
 }
 
-FastHeat::~FastHeat(){
+FastHeat::~FastHeat(void){
     delete ui;
 }
 
@@ -42,13 +74,16 @@ void FastHeat::SetRunningLabel(bool state){
 }
 
 void FastHeat::slRun(void){
-    this->SetRunningLabel(true);
-    this->SetRelayLabel(true);
+    if (ui->lineedit_setpoint->text().isEmpty()) return;
+    this->GUISetEnabled(GUI_ENABLE_STATE::ENB_RUN);
+
+    emit this->siStarted();
 }
 
 void FastHeat::slStop(void){
-    this->SetRunningLabel(false);
-    this->SetRelayLabel(false);
+    this->GUISetEnabled(GUI_ENABLE_STATE::ENB_STOP);
+
+    emit this->siStopped();
 }
 
 void FastHeat::slSaveImage(void){
@@ -133,7 +168,7 @@ void FastHeat::slSaveAll(void){
 }
 
 void FastHeat::slShowPlotMenu(const QPoint & pos){
-
+    Q_UNUSED(pos);
     this->plot_menu->popup(QCursor::pos());
     this->plot_menu->show();
 }

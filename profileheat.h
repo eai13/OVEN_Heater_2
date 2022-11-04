@@ -19,6 +19,14 @@ public:
     ~ProfileHeat();
 
 private:
+    enum GUI_ENABLE_STATE{
+        ENB_START_TEMP_NOT_SET  = 0x01,
+        ENB_START_TEMP_SET      = 0x02,
+        ENB_RUN                 = 0x03
+    };
+
+    void GUISetEnabled(GUI_ENABLE_STATE state);
+
     QList<QPointF> profile_lookup_table;
 
     QMenu * profile_plot_menu = nullptr;
@@ -46,6 +54,10 @@ public slots:
 
 public:
     void SaveExperiment(QString filename);
+
+signals:
+    void siStarted(void);
+    void siStopped(void);
 };
 
 #endif // PROFILEHEAT_H

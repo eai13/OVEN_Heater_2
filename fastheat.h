@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QMenu>
 #include <QCursor>
+#include <QTimer>
 
 namespace Ui {
 class FastHeat;
@@ -15,14 +16,24 @@ class FastHeat : public QWidget
 
 public:
     explicit FastHeat(QWidget *parent = nullptr);
-    ~FastHeat();
+    ~FastHeat(void);
 
 private:
+    enum GUI_ENABLE_STATE{
+        ENB_RUN     = 0x01,
+        ENB_STOP    = 0x02
+    };
+
+    void GUISetEnabled(GUI_ENABLE_STATE state);
+
     QMenu * plot_menu = nullptr;
     Ui::FastHeat *ui;
 
     void SetRelayLabel(bool state);
     void SetRunningLabel(bool state);
+
+//    QTimer * UpdateCurrentTempTimer = nullptr;
+//    QTimer * SendSetpointTimer = nullptr;
 
 public slots:
     void slRun(void);
@@ -31,6 +42,13 @@ public slots:
     void slSaveData(void);
     void slSaveAll(void);
     void slShowPlotMenu(const QPoint & pos);
+
+//    void slUpdateCurrentTemp(void);
+//    void slSendSetpoint(void);
+
+signals:
+    void siStarted(void);
+    void siStopped(void);
 };
 
 #endif // FASTHEAT_H

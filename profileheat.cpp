@@ -1,18 +1,76 @@
 #include "profileheat.h"
 #include "ui_profileheat.h"
 #include <QDataStream>
+#include <QDoubleValidator>
+
+void ProfileHeat::GUISetEnabled(GUI_ENABLE_STATE state){
+    switch(state){
+    case(GUI_ENABLE_STATE::ENB_START_TEMP_NOT_SET):{
+        ui->lineedit_pointspeed->setEnabled(false);
+        ui->lineedit_pointtemp->setEnabled(false);
+        ui->lineedit_pointspeed->setText("");
+        ui->lineedit_pointtemp->setText("");
+        ui->pushbutton_addpoint->setEnabled(false);
+        ui->pushbutton_clearpoints->setEnabled(false);
+        ui->pushbutton_removepoint->setEnabled(false);
+        ui->pushbutton_run->setEnabled(false);
+        ui->pushbutton_stop->setEnabled(false);
+        ui->pushbutton_setstarttemp->setEnabled(true);
+        ui->lineedit_starttemp->setEnabled(true);
+        ui->lineedit_starttemp->setText("");
+        this->SetRunningLabel(false);
+        break;
+    }
+    case(GUI_ENABLE_STATE::ENB_START_TEMP_SET):{
+        ui->lineedit_starttemp->setEnabled(false);
+        ui->pushbutton_setstarttemp->setEnabled(false);
+        ui->lineedit_pointtemp->setEnabled(true);
+        ui->lineedit_pointtemp->setText("");
+        ui->lineedit_pointspeed->setEnabled(true);
+        ui->lineedit_pointspeed->setText("");
+        ui->pushbutton_addpoint->setEnabled(true);
+        ui->pushbutton_clearpoints->setEnabled(true);
+        ui->pushbutton_removepoint->setEnabled(true);
+        ui->pushbutton_run->setEnabled(true);
+        ui->pushbutton_stop->setEnabled(false);
+        this->SetRunningLabel(false);
+        break;
+    }
+    case(GUI_ENABLE_STATE::ENB_RUN):{
+        ui->pushbutton_addpoint->setEnabled(false);
+        ui->pushbutton_clearpoints->setEnabled(false);
+        ui->pushbutton_removepoint->setEnabled(false);
+        ui->pushbutton_run->setEnabled(false);
+        ui->pushbutton_setstarttemp->setEnabled(false);
+        ui->pushbutton_stop->setEnabled(true);
+        ui->lineedit_pointspeed->setText("");
+        ui->lineedit_pointtemp->setText("");
+        ui->lineedit_pointspeed->setEnabled(false);
+        ui->lineedit_pointtemp->setEnabled(false);
+        this->SetRunningLabel(true);
+        ui->widget_realplot->graph(0)->data()->clear();
+        ui->widget_realplot->rescaleAxes();
+        ui->widget_realplot->xAxis->setRangeLower(0);
+        ui->widget_realplot->yAxis->setRangeLower(0);
+        ui->widget_realplot->replot();
+        break;
+    }
+    default:{
+        break;
+    }
+    }
+}
 
 ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), ui(new Ui::ProfileHeat){
     ui->setupUi(this);
 
 
-    ui->pushbutton_addpoint->setEnabled(false);
-    ui->pushbutton_clearpoints->setEnabled(false);
-    ui->pushbutton_removepoint->setEnabled(false);
-    ui->pushbutton_run->setEnabled(false);
-    ui->pushbutton_stop->setEnabled(false);
-    ui->lineedit_pointspeed->setEnabled(false);
-    ui->lineedit_pointtemp->setEnabled(false);
+
+    ui->lineedit_pointspeed->setValidator(new QDoubleValidator(0, 25, 2));
+    ui->lineedit_pointtemp->setValidator(new QDoubleValidator(20, 1000, 2));
+    ui->lineedit_starttemp->setValidator(new QDoubleValidator(20, 1000, 2));
+
+    this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_NOT_SET);
 
     this->profile_plot_menu = new QMenu;
     this->profile_plot_menu->addAction("Save Image", this, &ProfileHeat::slSaveProfileImage);
@@ -48,17 +106,7 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
                 stream >> value;
                 ui->widget_profileplot->graph(0)->addData(key, value);
                 ui->lineedit_starttemp->setText(QString::asprintf("%.2f", value));
-                ui->lineedit_starttemp->setEnabled(false);
-                ui->pushbutton_setstarttemp->setEnabled(false);
-                ui->lineedit_pointtemp->setEnabled(true);
-                ui->lineedit_pointtemp->setText("");
-                ui->lineedit_pointspeed->setEnabled(true);
-                ui->lineedit_pointspeed->setText("");
-                ui->pushbutton_addpoint->setEnabled(true);
-                ui->pushbutton_clearpoints->setEnabled(true);
-                ui->pushbutton_removepoint->setEnabled(true);
-                ui->pushbutton_run->setEnabled(true);
-                ui->pushbutton_stop->setEnabled(false);
+                this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_SET);
                 data_count--;
                 while(data_count--){
                     stream >> key;
@@ -84,8 +132,7 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
     connect(ui->pushbutton_clearpoints, &QPushButton::released, this, &ProfileHeat::slClearProfile);
 }
 
-ProfileHeat::~ProfileHeat()
-{
+ProfileHeat::~ProfileHeat(){
     delete this->profile_plot_menu;
     delete this->real_plot_menu;
     delete ui;
@@ -106,12 +153,15 @@ void ProfileHeat::SetRunningLabel(bool state){
 }
 
 void ProfileHeat::slRun(void){
-    this->SetRelayLabel(true);
+    this->GUISetEnabled(GUI_ENABLE_STATE::ENB_RUN);
+
+    emit this->siStarted();
 }
 
 void ProfileHeat::slStop(void){
-    this->SetRelayLabel(false);
-    this->SetRunningLabel(false);
+    this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_SET);
+
+    emit this->siStopped();
 }
 
 void ProfileHeat::slSaveRealImage(void){
@@ -256,11 +306,13 @@ void ProfileHeat::slSaveAll(void){
 }
 
 void ProfileHeat::slShowRealPlotMenu(const QPoint & pos){
+    Q_UNUSED(pos);
     this->real_plot_menu->popup(QCursor::pos());
     this->real_plot_menu->show();
 }
 
 void ProfileHeat::slShowProfilePlotMenu(const QPoint & pos){
+    Q_UNUSED(pos);
     this->profile_plot_menu->popup(QCursor::pos());
     this->profile_plot_menu->show();
 }
@@ -268,23 +320,13 @@ void ProfileHeat::slShowProfilePlotMenu(const QPoint & pos){
 void ProfileHeat::slSetStartingTemperature(void){
     if (ui->lineedit_starttemp->text().isEmpty()) return;
 
+    this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_SET);
+
     ui->widget_profileplot->graph(0)->addData(0, ui->lineedit_starttemp->text().toDouble());
     ui->widget_profileplot->rescaleAxes();
     ui->widget_profileplot->yAxis->setRangeLower(0);
     ui->widget_profileplot->xAxis->setRangeLower(0);
     ui->widget_profileplot->replot();
-
-    ui->lineedit_starttemp->setEnabled(false);
-    ui->pushbutton_setstarttemp->setEnabled(false);
-    ui->lineedit_pointtemp->setEnabled(true);
-    ui->lineedit_pointtemp->setText("");
-    ui->lineedit_pointspeed->setEnabled(true);
-    ui->lineedit_pointspeed->setText("");
-    ui->pushbutton_addpoint->setEnabled(true);
-    ui->pushbutton_clearpoints->setEnabled(true);
-    ui->pushbutton_removepoint->setEnabled(true);
-    ui->pushbutton_run->setEnabled(true);
-    ui->pushbutton_stop->setEnabled(false);
 }
 
 void ProfileHeat::slAddProfilePoint(void){
@@ -306,18 +348,7 @@ void ProfileHeat::slAddProfilePoint(void){
 
 void ProfileHeat::slRemoveProfilePoint(void){
     if (ui->widget_profileplot->graph(0)->dataCount() == 1){
-        ui->lineedit_pointspeed->setEnabled(false);
-        ui->lineedit_pointtemp->setEnabled(false);
-        ui->lineedit_pointspeed->setText("");
-        ui->lineedit_pointtemp->setText("");
-        ui->pushbutton_addpoint->setEnabled(false);
-        ui->pushbutton_clearpoints->setEnabled(false);
-        ui->pushbutton_removepoint->setEnabled(false);
-        ui->pushbutton_run->setEnabled(false);
-        ui->pushbutton_stop->setEnabled(false);
-        ui->pushbutton_setstarttemp->setEnabled(true);
-        ui->lineedit_starttemp->setEnabled(true);
-        ui->lineedit_starttemp->setText("");
+        this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_NOT_SET);
     }
 
     ui->widget_profileplot->graph(0)->data()->removeAfter((ui->widget_profileplot->graph(0)->data()->end() - 1)->key - 0.000001);
@@ -337,18 +368,7 @@ void ProfileHeat::slClearProfile(void){
     ui->widget_profileplot->xAxis->setRangeLower(0);
     ui->widget_profileplot->replot();
 
-    ui->lineedit_pointspeed->setEnabled(false);
-    ui->lineedit_pointtemp->setEnabled(false);
-    ui->lineedit_pointspeed->setText("");
-    ui->lineedit_pointtemp->setText("");
-    ui->pushbutton_addpoint->setEnabled(false);
-    ui->pushbutton_clearpoints->setEnabled(false);
-    ui->pushbutton_removepoint->setEnabled(false);
-    ui->pushbutton_run->setEnabled(false);
-    ui->pushbutton_stop->setEnabled(false);
-    ui->pushbutton_setstarttemp->setEnabled(true);
-    ui->lineedit_starttemp->setEnabled(true);
-    ui->lineedit_starttemp->setText("");
+    this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_NOT_SET);
 }
 
 void ProfileHeat::SaveExperiment(QString filename){
