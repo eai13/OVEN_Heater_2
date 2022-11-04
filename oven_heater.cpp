@@ -6,6 +6,7 @@
 OVEN_Heater::OVEN_Heater(QWidget *parent) : QMainWindow(parent), ui(new Ui::OVEN_Heater){
     ui->setupUi(this);
 
+
     connect(ui->action_fast_heating, &QAction::toggled, this, &OVEN_Heater::slSwitchToFastHeat);
     connect(ui->action_profile_heating, &QAction::toggled, this, &OVEN_Heater::slSwitchToProfileHeat);
     connect(ui->action_save_experiment_as, &QAction::triggered, this, &OVEN_Heater::slSaveExperiment);
@@ -13,6 +14,7 @@ OVEN_Heater::OVEN_Heater(QWidget *parent) : QMainWindow(parent), ui(new Ui::OVEN
     connect(ui->action_modbus_settings, &QAction::triggered, this, &OVEN_Heater::slShowMODBUSConfig);
     connect(ui->action_serial_settings, &QAction::triggered, this, &OVEN_Heater::slShowSerialConfig);
 
+    this->setWindowIcon(                QIcon(":/ICONS/ICONS/MAIN_icon.png"));
     ui->action_profile_heating->setIcon(QIcon(":/ICONS/ICONS/PH_icon.png"));
     ui->action_fast_heating->setIcon(   QIcon(":/ICONS/ICONS/FH_icon.png"));
     ui->action_load_experiment->setIcon(QIcon(":/ICONS/ICONS/UPLOAD_icon.png"));
