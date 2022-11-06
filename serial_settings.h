@@ -12,7 +12,7 @@ class Serial_Settings : public QWidget
     Q_OBJECT
 
 public:
-    explicit Serial_Settings(QWidget *parent = nullptr);
+    explicit Serial_Settings(uint32_t baudrate, QWidget *parent = nullptr);
     ~Serial_Settings();
 
 private:

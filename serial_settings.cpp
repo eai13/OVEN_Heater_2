@@ -2,13 +2,14 @@
 #include "ui_serial_settings.h"
 #include <QIntValidator>
 
-Serial_Settings::Serial_Settings(QWidget *parent) :
+Serial_Settings::Serial_Settings(uint32_t baudrate, QWidget *parent) :
     QWidget(parent),
     ui(new Ui::Serial_Settings)
 {
     ui->setupUi(this);
 
     ui->lineedit_baud->setValidator(new QIntValidator(0, 115200));
+    ui->lineedit_baud->setText(QString::number(baudrate));
 
     connect(ui->pushbutton_apply, &QPushButton::released, this, &Serial_Settings::slApply);
     connect(ui->pushbutton_cancel, &QPushButton::released, this, &Serial_Settings::slCancel);

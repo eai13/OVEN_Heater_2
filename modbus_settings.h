@@ -12,7 +12,7 @@ class MODBUS_Settings : public QWidget
     Q_OBJECT
 
 public:
-    explicit MODBUS_Settings(QWidget *parent = nullptr);
+    explicit MODBUS_Settings(uint16_t sl_a, uint16_t te_a, uint16_t re_a, uint16_t pi_a, uint16_t en_a, uint16_t sp_a, QWidget *parent = nullptr);
     ~MODBUS_Settings();
 
 private:
@@ -23,7 +23,7 @@ private slots:
     void slCancel(void);
 
 signals:
-    void siSendNewParameters(uint8_t address, uint16_t tempaddr, uint16_t relayaddr, uint16_t pidaddr, uint16_t enanbleaddr);
+    void siSendNewParameters(uint8_t address, uint16_t tempaddr, uint16_t relayaddr, uint16_t pidaddr, uint16_t enanbleaddr, uint16_t setpointaddr);
 };
 
 #endif // MODBUS_SETTINGS_H

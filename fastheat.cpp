@@ -77,13 +77,19 @@ void FastHeat::slRun(void){
     if (ui->lineedit_setpoint->text().isEmpty()) return;
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_RUN);
 
-    emit this->siStarted();
+//    emit this->siStarted();
+    emit this->siSendEnable(1);
+    QString sp = ui->lineedit_setpoint->text();
+    for (auto iter = sp.begin(); iter != sp.end(); iter++)
+        if (*iter == ',') *iter = '.';
+    emit this->siSendSetPoint(sp.toFloat());
 }
 
 void FastHeat::slStop(void){
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_STOP);
 
-    emit this->siStopped();
+//    emit this->siStopped();
+    emit this->siSendEnable(0);
 }
 
 void FastHeat::slSaveImage(void){
@@ -171,4 +177,12 @@ void FastHeat::slShowPlotMenu(const QPoint & pos){
     Q_UNUSED(pos);
     this->plot_menu->popup(QCursor::pos());
     this->plot_menu->show();
+}
+
+void FastHeat::slReceiveRelay(uint16_t relay){
+    this->SetRelayLabel(relay);
+}
+
+void FastHeat::slReceiveTemp(float temp){
+    ui->lcdnumber_actualvalue->display(temp);
 }

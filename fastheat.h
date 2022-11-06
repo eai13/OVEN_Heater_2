@@ -36,6 +36,8 @@ private:
 //    QTimer * SendSetpointTimer = nullptr;
 
 public slots:
+    void slReceiveTemp(float temp);
+    void slReceiveRelay(uint16_t relay);
     void slRun(void);
     void slStop(void);
     void slSaveImage(void);
@@ -47,6 +49,9 @@ public slots:
 //    void slSendSetpoint(void);
 
 signals:
+    void siSendEnable(uint16_t enb);
+    void siSendPID(uint16_t PID);
+    void siSendSetPoint(uint16_t sp);
     void siStarted(void);
     void siStopped(void);
 };

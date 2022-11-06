@@ -37,6 +37,8 @@ private:
     void SetRunningLabel(bool state);
 
 public slots:
+    void slReceiveTemp(float temp);
+    void slReceiveRelay(uint16_t relay);
     void slRun(void);
     void slStop(void);
     void slSaveRealImage(void);
@@ -58,6 +60,9 @@ public:
 signals:
     void siStarted(void);
     void siStopped(void);
+    void siSendEnable(uint16_t enb);
+    void siSendPID(uint16_t PID);
+    void siSendSetPoint(uint16_t sp);
 };
 
 #endif // PROFILEHEAT_H

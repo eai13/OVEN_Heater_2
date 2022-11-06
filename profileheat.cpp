@@ -155,13 +155,15 @@ void ProfileHeat::SetRunningLabel(bool state){
 void ProfileHeat::slRun(void){
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_RUN);
 
-    emit this->siStarted();
+//    emit this->siStarted();
+    emit this->siSendEnable(1);
 }
 
 void ProfileHeat::slStop(void){
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_SET);
 
-    emit this->siStopped();
+//    emit this->siStopped();
+    emit this->siSendEnable(0);
 }
 
 void ProfileHeat::slSaveRealImage(void){
@@ -382,4 +384,11 @@ void ProfileHeat::SaveExperiment(QString filename){
         }
         file.close();
     }
+}
+
+void ProfileHeat::slReceiveTemp(float temp){
+    ui->lcdnumber_actualtemp->display(temp);
+}
+void ProfileHeat::slReceiveRelay(uint16_t relay){
+    this->SetRelayLabel(relay);
 }
