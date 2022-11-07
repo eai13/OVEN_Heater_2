@@ -2,6 +2,7 @@
 #include "ui_fastheat.h"
 #include <QDoubleValidator>
 #include "qglobal.h"
+#include <cmath>
 
 void FastHeat::GUISetEnabled(GUI_ENABLE_STATE state){
     switch(state){
@@ -53,9 +54,14 @@ FastHeat::FastHeat(QWidget *parent) : QWidget(parent), ui(new Ui::FastHeat){
     ui->widget_realplot->rescaleAxes();
     ui->widget_realplot->xAxis->setRangeLower(0);
     ui->widget_realplot->yAxis->setRangeLower(0);
+
+    this->run_timer = new QTimer;
+    connect(this->run_timer, &QTimer::timeout, this, &FastHeat::slRunTimerProcess);
 }
 
 FastHeat::~FastHeat(void){
+    delete this->plot_menu;
+    delete this->run_timer;
     delete ui;
 }
 
@@ -77,19 +83,46 @@ void FastHeat::slRun(void){
     if (ui->lineedit_setpoint->text().isEmpty()) return;
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_RUN);
 
-//    emit this->siStarted();
     emit this->siSendEnable(1);
     QString sp = ui->lineedit_setpoint->text();
     for (auto iter = sp.begin(); iter != sp.end(); iter++)
         if (*iter == ',') *iter = '.';
     emit this->siSendSetPoint(sp.toFloat());
+
+    this->run_timer->start(100);
 }
 
 void FastHeat::slStop(void){
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_STOP);
 
-//    emit this->siStopped();
     emit this->siSendEnable(0);
+
+    this->run_timer->stop();
+}
+
+void FastHeat::slRunTimerProcess(void){
+    QString temp_txt = ui->lineedit_setpoint->text();
+    for (auto iter = temp_txt.begin(); iter != temp_txt.end(); iter++)
+        if (*iter == ',') *iter = '.';
+    float setpoint_temp = temp_txt.toFloat();
+    if (this->is_at_plane){
+        if (std::abs(temperature - setpoint_temp) > 3){
+            emit this->siSendPID(PID_NUMBER::PID_PI_PLAIN);
+        }
+        else{
+            emit this->siSendPID(PID_NUMBER::PID_P_PLAIN);
+        }
+    }
+    else{
+        if (std::abs(temperature - setpoint_temp) < 5){
+            this->is_at_plane = true;
+            emit this->siSendPID(PID_NUMBER::PID_P_PLAIN);
+        }
+        else{
+            this->is_at_plane = false;
+            emit this->siSendPID(PID_NUMBER::PID_RAMP);
+        }
+    }
 }
 
 void FastHeat::slSaveImage(void){
@@ -184,5 +217,6 @@ void FastHeat::slReceiveRelay(uint16_t relay){
 }
 
 void FastHeat::slReceiveTemp(float temp){
+    this->temperature = temp;
     ui->lcdnumber_actualvalue->display(temp);
 }

@@ -23,8 +23,18 @@ private:
         ENB_RUN     = 0x01,
         ENB_STOP    = 0x02
     };
+    enum PID_NUMBER{
+        PID_RAMP        = 0x01,
+        PID_P_PLAIN     = 0x02,
+        PID_PI_PLAIN    = 0x03
+    };
+
+    float temperature = 0;
+    bool is_at_plane = false;
 
     void GUISetEnabled(GUI_ENABLE_STATE state);
+
+    QTimer * run_timer = nullptr;
 
     QMenu * plot_menu = nullptr;
     Ui::FastHeat *ui;
@@ -34,6 +44,9 @@ private:
 
 //    QTimer * UpdateCurrentTempTimer = nullptr;
 //    QTimer * SendSetpointTimer = nullptr;
+
+private slots:
+    void slRunTimerProcess(void);
 
 public slots:
     void slReceiveTemp(float temp);
