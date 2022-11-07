@@ -117,6 +117,7 @@ OVEN_Heater::OVEN_Heater(QWidget *parent) : QMainWindow(parent), ui(new Ui::OVEN
     connect(this->fast_heat, &FastHeat::siSendEnable, this, &OVEN_Heater::slReceiveEnable);
     connect(this->fast_heat, &FastHeat::siSendPID, this, &OVEN_Heater::slReceivePID);
     connect(this->fast_heat, &FastHeat::siSendSetPoint, this, &OVEN_Heater::slReceiveSetPoint);
+    connect(this, &OVEN_Heater::siConnectionLost, this->fast_heat, &FastHeat::slStop);
 }
 
 OVEN_Heater::~OVEN_Heater(){
@@ -134,6 +135,7 @@ void OVEN_Heater::slSwitchToFastHeat(bool state){
         disconnect(this->profile_heat, &ProfileHeat::siSendEnable, this, &OVEN_Heater::slReceiveEnable);
         disconnect(this->profile_heat, &ProfileHeat::siSendPID, this, &OVEN_Heater::slReceivePID);
         disconnect(this->profile_heat, &ProfileHeat::siSendSetPoint, this, &OVEN_Heater::slReceiveSetPoint);
+        disconnect(this, &OVEN_Heater::siConnectionLost, this->profile_heat, &ProfileHeat::slStop);
         ui->verticalLayout->removeWidget(this->profile_heat);
         delete this->profile_heat;
         this->profile_heat = nullptr;
@@ -148,6 +150,7 @@ void OVEN_Heater::slSwitchToFastHeat(bool state){
     connect(this->fast_heat, &FastHeat::siSendEnable, this, &OVEN_Heater::slReceiveEnable);
     connect(this->fast_heat, &FastHeat::siSendPID, this, &OVEN_Heater::slReceivePID);
     connect(this->fast_heat, &FastHeat::siSendSetPoint, this, &OVEN_Heater::slReceiveSetPoint);
+    connect(this, &OVEN_Heater::siConnectionLost, this->fast_heat, &FastHeat::slStop);
 }
 
 void OVEN_Heater::slSwitchToProfileHeat(bool state){
@@ -161,6 +164,7 @@ void OVEN_Heater::slSwitchToProfileHeat(bool state){
         disconnect(this->fast_heat, &FastHeat::siSendEnable, this, &OVEN_Heater::slReceiveEnable);
         disconnect(this->fast_heat, &FastHeat::siSendPID, this, &OVEN_Heater::slReceivePID);
         disconnect(this->fast_heat, &FastHeat::siSendSetPoint, this, &OVEN_Heater::slReceiveSetPoint);
+        disconnect(this, &OVEN_Heater::siConnectionLost, this->fast_heat, &FastHeat::slStop);
         ui->verticalLayout->removeWidget(this->fast_heat);
         delete this->fast_heat;
         this->fast_heat = nullptr;
@@ -178,6 +182,7 @@ void OVEN_Heater::slSwitchToProfileHeat(bool state){
     connect(this->profile_heat, &ProfileHeat::siSendEnable, this, &OVEN_Heater::slReceiveEnable);
     connect(this->profile_heat, &ProfileHeat::siSendPID, this, &OVEN_Heater::slReceivePID);
     connect(this->profile_heat, &ProfileHeat::siSendSetPoint, this, &OVEN_Heater::slReceiveSetPoint);
+    connect(this, &OVEN_Heater::siConnectionLost, this->profile_heat, &ProfileHeat::slStop);
 }
 
 void OVEN_Heater::slSaveExperiment(void){
@@ -424,4 +429,6 @@ void OVEN_Heater::slSerialTimeout(void){
     this->bytes_awaited = 0;
 //    if (this->serial->bytesAvailable()) this->serial->readAll();
     this->ConnectionOK = false;
+
+    emit this->siConnectionLost();
 }

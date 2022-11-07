@@ -86,6 +86,7 @@ private:
 signals:
     void siSendTemperature(float temp);
     void siSendRelay(uint16_t relay);
+    void siConnectionLost(void);
 
 public slots:
     void slReceiveEnable(uint16_t enb){

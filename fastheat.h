@@ -34,7 +34,8 @@ private:
 
     void GUISetEnabled(GUI_ENABLE_STATE state);
 
-    QTimer * run_timer = nullptr;
+    QTime *     global_time = nullptr;
+    QTimer *    run_timer = nullptr;
 
     QMenu * plot_menu = nullptr;
     Ui::FastHeat *ui;

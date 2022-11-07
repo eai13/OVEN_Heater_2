@@ -57,11 +57,14 @@ FastHeat::FastHeat(QWidget *parent) : QWidget(parent), ui(new Ui::FastHeat){
 
     this->run_timer = new QTimer;
     connect(this->run_timer, &QTimer::timeout, this, &FastHeat::slRunTimerProcess);
+
+    this->global_time = new QTime;
 }
 
 FastHeat::~FastHeat(void){
     delete this->plot_menu;
     delete this->run_timer;
+    delete this->global_time;
     delete ui;
 }
 
@@ -83,6 +86,12 @@ void FastHeat::slRun(void){
     if (ui->lineedit_setpoint->text().isEmpty()) return;
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_RUN);
 
+    ui->widget_realplot->graph(0)->data()->clear();
+    ui->widget_realplot->rescaleAxes();
+    ui->widget_realplot->xAxis->setRangeLower(0);
+    ui->widget_realplot->yAxis->setRangeLower(0);
+    ui->widget_realplot->replot();
+
     emit this->siSendEnable(1);
     QString sp = ui->lineedit_setpoint->text();
     for (auto iter = sp.begin(); iter != sp.end(); iter++)
@@ -90,6 +99,7 @@ void FastHeat::slRun(void){
     emit this->siSendSetPoint(sp.toFloat());
 
     this->run_timer->start(100);
+    this->global_time->restart();
 }
 
 void FastHeat::slStop(void){
@@ -104,6 +114,11 @@ void FastHeat::slRunTimerProcess(void){
     QString temp_txt = ui->lineedit_setpoint->text();
     for (auto iter = temp_txt.begin(); iter != temp_txt.end(); iter++)
         if (*iter == ',') *iter = '.';
+    ui->widget_realplot->graph(0)->addData((float)(this->global_time->elapsed()) / float(1000), this->temperature);
+    ui->widget_realplot->rescaleAxes();
+    ui->widget_realplot->xAxis->setRangeLower(0);
+    ui->widget_realplot->yAxis->setRangeLower(0);
+    ui->widget_realplot->replot();
     float setpoint_temp = temp_txt.toFloat();
     if (this->is_at_plane){
         if (std::abs(temperature - setpoint_temp) > 3){
