@@ -24,10 +24,22 @@ private:
         ENB_START_TEMP_SET      = 0x02,
         ENB_RUN                 = 0x03
     };
+    enum PID_NUMBER{
+        PID_RAMP        = 0x01,
+        PID_P_PLAIN     = 0x02,
+        PID_PI_PLAIN    = 0x03
+    };
 
     void GUISetEnabled(GUI_ENABLE_STATE state);
 
     QList<QPointF> profile_lookup_table;
+    QList<QPointF> profile_discrete;
+
+    bool        is_at_plain = false;
+    float       prev_set_temperature = 0;
+    float       real_temperature = 0;
+    QTime *     global_time = nullptr;
+    QTimer *    run_timer = nullptr;
 
     QMenu * profile_plot_menu = nullptr;
     QMenu * real_plot_menu = nullptr;
@@ -35,6 +47,9 @@ private:
 
     void SetRelayLabel(bool state);
     void SetRunningLabel(bool state);
+
+private slots:
+    void slRunProcessCallback(void);
 
 public slots:
     void slReceiveTemp(float temp);

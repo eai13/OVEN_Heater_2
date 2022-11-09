@@ -178,7 +178,10 @@ void FastHeat::slSaveData(void){
             stream << "Time, s;Temperature, C" << endl;
             QSharedPointer<QCPGraphDataContainer> datacontainer = ui->widget_realplot->graph(0)->data();
             for (auto iter = datacontainer->begin(); iter != datacontainer->end(); iter++){
-                stream << iter->key << ";" << iter->value << endl;
+                QString tmp_value = QString::asprintf("%.2f", iter->value);
+                for (auto chr = tmp_value.begin(); chr != tmp_value.end(); chr++)
+                    if (*chr == '.') *chr = ',';
+                stream << iter->key << ";" << tmp_value << endl;
             }
             file.close();
         }
@@ -203,7 +206,10 @@ void FastHeat::slSaveAll(void){
             stream << "Time, s;Temperature, C" << endl;
             QSharedPointer<QCPGraphDataContainer> datacontainer = ui->widget_realplot->graph(0)->data();
             for (auto iter = datacontainer->begin(); iter != datacontainer->end(); iter++){
-                stream << iter->key << ";" << iter->value << endl;
+                QString tmp_value = QString::asprintf("%.2f", iter->value);
+                for (auto chr = tmp_value.begin(); chr != tmp_value.end(); chr++)
+                    if (*chr == '.') *chr = ',';
+                stream << iter->key << ";" << tmp_value << endl;
             }
             file.close();
         }

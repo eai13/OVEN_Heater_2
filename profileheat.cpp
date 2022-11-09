@@ -2,6 +2,9 @@
 #include "ui_profileheat.h"
 #include <QDataStream>
 #include <QDoubleValidator>
+#include <QPointF>
+
+#define TIME_DISCRETE   ((float)(1.0))
 
 void ProfileHeat::GUISetEnabled(GUI_ENABLE_STATE state){
     switch(state){
@@ -64,8 +67,6 @@ void ProfileHeat::GUISetEnabled(GUI_ENABLE_STATE state){
 ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), ui(new Ui::ProfileHeat){
     ui->setupUi(this);
 
-
-
     ui->lineedit_pointspeed->setValidator(new QDoubleValidator(0, 25, 2));
     ui->lineedit_pointtemp->setValidator(new QDoubleValidator(20, 1000, 2));
     ui->lineedit_starttemp->setValidator(new QDoubleValidator(20, 1000, 2));
@@ -104,6 +105,7 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
             if (data_count){
                 stream >> key;
                 stream >> value;
+                this->profile_lookup_table.push_back(QPointF(key, value));
                 ui->widget_profileplot->graph(0)->addData(key, value);
                 ui->lineedit_starttemp->setText(QString::asprintf("%.2f", value));
                 this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_SET);
@@ -111,6 +113,7 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
                 while(data_count--){
                     stream >> key;
                     stream >> value;
+                    this->profile_lookup_table.push_back(QPointF(key, value));
                     ui->widget_profileplot->graph(0)->addData(key, value);
                 }
             }
@@ -130,10 +133,16 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
     connect(ui->pushbutton_addpoint, &QPushButton::released, this, &ProfileHeat::slAddProfilePoint);
     connect(ui->pushbutton_removepoint, &QPushButton::released, this, &ProfileHeat::slRemoveProfilePoint);
     connect(ui->pushbutton_clearpoints, &QPushButton::released, this, &ProfileHeat::slClearProfile);
+
+    this->global_time = new QTime;
+    this->run_timer = new QTimer;
+    connect(this->run_timer, &QTimer::timeout, this, &ProfileHeat::slRunProcessCallback);
 }
 
 ProfileHeat::~ProfileHeat(){
     delete this->profile_plot_menu;
+    delete this->real_plot_menu;
+    delete this->global_time;
     delete this->real_plot_menu;
     delete ui;
 }
@@ -154,15 +163,72 @@ void ProfileHeat::SetRunningLabel(bool state){
 
 void ProfileHeat::slRun(void){
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_RUN);
+    qDebug() << "HERE";
+    this->profile_discrete.push_back(this->profile_lookup_table.front());
+    for (auto iter = (++(this->profile_lookup_table.begin())); iter != this->profile_lookup_table.end(); iter++){
+        QPointF current = this->profile_discrete.back();
+        QPointF next = (*iter);
+        uint32_t points_amount = (next - current).x() / TIME_DISCRETE;
+        float temp_inc = (next.y() - current.y()) / points_amount;
+        qDebug() << "POINTS AMOUNT: " << points_amount;
+        qDebug() << "TEMP INCREMENT: " << temp_inc;
 
-//    emit this->siStarted();
+        for (float temp = current.y(), time = current.x(); points_amount--; ){
+//            ui->widget_realplot->graph(0)->addData(time + TIME_DISCRETE, temp + temp_inc);
+            this->profile_discrete.push_back(QPointF(time += TIME_DISCRETE, temp += temp_inc));
+        }
+//        ui->widget_realplot->rescaleAxes();
+//        ui->widget_realplot->xAxis->setRangeLower(0);
+//        ui->widget_realplot->yAxis->setRangeLower(0);
+//        ui->widget_realplot->replot();
+    }
+
     emit this->siSendEnable(1);
+    this->global_time->restart();
+    this->run_timer->start(100);
+}
+
+void ProfileHeat::slRunProcessCallback(void){
+    float requested_temp;
+    float current_time = (float)(this->global_time->elapsed()) / (float)(1000);
+    if (this->profile_discrete.isEmpty()){
+        this->is_at_plain = true;
+        requested_temp = this->prev_set_temperature;
+    }
+    else{
+        float requested_time = this->profile_discrete.back().x();
+        requested_temp = this->profile_discrete.back().y();
+        if (requested_time <= current_time){
+            this->profile_discrete.pop_back();
+            if (std::abs(this->prev_set_temperature - requested_temp) < 0.0001) this->is_at_plain = true;
+            else this->is_at_plain = false;
+            this->prev_set_temperature = requested_temp;
+            emit this->siSendSetPoint(requested_temp);
+        }
+    }
+    if (this->is_at_plain){
+        if (std::abs(requested_temp - this->real_temperature) > 3){
+            emit this->siSendPID(PID_NUMBER::PID_PI_PLAIN);
+        }
+        else{
+            emit this->siSendPID(PID_NUMBER::PID_P_PLAIN);
+        }
+    }
+    else{
+        emit this->siSendPID(PID_NUMBER::PID_RAMP);
+    }
+    ui->widget_realplot->graph(0)->addData(current_time, this->real_temperature);
+    ui->widget_realplot->rescaleAxes();
+    ui->widget_realplot->xAxis->setRangeLower(0);
+    ui->widget_realplot->yAxis->setRangeLower(0);
+    ui->widget_realplot->replot();
 }
 
 void ProfileHeat::slStop(void){
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_SET);
 
-//    emit this->siStopped();
+    this->profile_discrete.clear();
+    this->run_timer->stop();
     emit this->siSendEnable(0);
 }
 
@@ -204,7 +270,10 @@ void ProfileHeat::slSaveRealData(void){
             stream << "Time, s;Temperature, C" << endl;
             QSharedPointer<QCPGraphDataContainer> datacontainer = ui->widget_realplot->graph(0)->data();
             for (auto iter = datacontainer->begin(); iter != datacontainer->end(); iter++){
-                stream << iter->key << ";" << iter->value << endl;
+                QString tmp_value = QString::asprintf("%.2f", iter->value);
+                for (auto chr = tmp_value.begin(); chr != tmp_value.end(); chr++)
+                    if (*chr == '.') *chr = ',';
+                stream << iter->key << ";" << tmp_value << endl;
             }
             file.close();
         }
@@ -249,7 +318,10 @@ void ProfileHeat::slSaveProfileData(void){
             stream << "Time, s;Temperature, C" << endl;
             QSharedPointer<QCPGraphDataContainer> datacontainer = ui->widget_profileplot->graph(0)->data();
             for (auto iter = datacontainer->begin(); iter != datacontainer->end(); iter++){
-                stream << iter->key << ";" << iter->value << endl;
+                QString tmp_value = QString::asprintf("%.2f", iter->value);
+                for (auto chr = tmp_value.begin(); chr != tmp_value.end(); chr++)
+                    if (*chr == '.') *chr = ',';
+                stream << iter->key << ";" << tmp_value << endl;
             }
             file.close();
         }
@@ -286,7 +358,10 @@ void ProfileHeat::slSaveAll(void){
             stream << "Time, s;Temperature, C" << endl;
             QSharedPointer<QCPGraphDataContainer> datacontainer = ui->widget_profileplot->graph(0)->data();
             for (auto iter = datacontainer->begin(); iter != datacontainer->end(); iter++){
-                stream << iter->key << ";" << iter->value << endl;
+                QString tmp_value = QString::asprintf("%.2f", iter->value);
+                for (auto chr = tmp_value.begin(); chr != tmp_value.end(); chr++)
+                    if (*chr == '.') *chr = ',';
+                stream << iter->key << ";" << tmp_value << endl;
             }
             file_profile.close();
         }
@@ -324,6 +399,7 @@ void ProfileHeat::slSetStartingTemperature(void){
 
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_SET);
 
+    this->profile_lookup_table.push_back(QPointF(0, ui->lineedit_starttemp->text().toDouble()));
     ui->widget_profileplot->graph(0)->addData(0, ui->lineedit_starttemp->text().toDouble());
     ui->widget_profileplot->rescaleAxes();
     ui->widget_profileplot->yAxis->setRangeLower(0);
@@ -341,6 +417,7 @@ void ProfileHeat::slAddProfilePoint(void){
     double prev_temp = (ui->widget_profileplot->graph(0)->data()->end() - 1)->value;
     double prev_time = (ui->widget_profileplot->graph(0)->data()->end() - 1)->key;
 
+    this->profile_lookup_table.push_back(QPointF(prev_time + abs((cur_temp - prev_temp) / speed) * 60, cur_temp));
     ui->widget_profileplot->graph(0)->addData(prev_time + abs((cur_temp - prev_temp) / speed) * 60, cur_temp);
     ui->widget_profileplot->rescaleAxes();
     ui->widget_profileplot->yAxis->setRangeLower(0);
@@ -353,6 +430,7 @@ void ProfileHeat::slRemoveProfilePoint(void){
         this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_NOT_SET);
     }
 
+    this->profile_lookup_table.pop_back();
     ui->widget_profileplot->graph(0)->data()->removeAfter((ui->widget_profileplot->graph(0)->data()->end() - 1)->key - 0.000001);
     ui->widget_profileplot->rescaleAxes();
     ui->widget_profileplot->yAxis->setRangeLower(0);
@@ -364,6 +442,7 @@ void ProfileHeat::slRemoveProfilePoint(void){
 }
 
 void ProfileHeat::slClearProfile(void){
+    this->profile_lookup_table.clear();
     ui->widget_profileplot->graph(0)->data()->clear();
     ui->widget_profileplot->rescaleAxes();
     ui->widget_profileplot->yAxis->setRangeLower(0);
@@ -388,6 +467,7 @@ void ProfileHeat::SaveExperiment(QString filename){
 
 void ProfileHeat::slReceiveTemp(float temp){
     ui->lcdnumber_actualtemp->display(temp);
+    this->real_temperature = temp;
 }
 void ProfileHeat::slReceiveRelay(uint16_t relay){
     this->SetRelayLabel(relay);
