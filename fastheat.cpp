@@ -63,7 +63,12 @@ FastHeat::FastHeat(QWidget *parent) : QWidget(parent), ui(new Ui::FastHeat){
 
 FastHeat::~FastHeat(void){
     delete this->plot_menu;
-    delete this->run_timer;
+    if (this->run_timer != nullptr){
+        if (this->run_timer->isActive()){
+            this->run_timer->stop();
+        }
+        delete this->run_timer;
+    }
     delete this->global_time;
     delete ui;
 }

@@ -96,6 +96,7 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
     ui->widget_profileplot->addGraph()->setPen(QPen(Qt::red));
 
     if (!(from_file.isEmpty())){
+        qDebug() << "FROM FILE : " << from_file;
         QFile file(from_file);
         if (file.open(QIODevice::ReadOnly)){
             QDataStream stream(&file);
@@ -140,10 +141,21 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
 }
 
 ProfileHeat::~ProfileHeat(){
-    delete this->profile_plot_menu;
-    delete this->real_plot_menu;
-    delete this->global_time;
-    delete this->real_plot_menu;
+    if (this->profile_plot_menu != nullptr){
+        delete this->profile_plot_menu;
+    }
+    if (this->real_plot_menu != nullptr){
+        delete this->real_plot_menu;
+    }
+    if (this->global_time != nullptr){
+        delete this->global_time;
+    }
+    if (this->run_timer != nullptr){
+        if (this->run_timer->isActive()){
+            this->run_timer->stop();
+        }
+        delete this->run_timer;
+    }
     delete ui;
 }
 
