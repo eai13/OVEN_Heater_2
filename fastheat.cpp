@@ -6,6 +6,13 @@
 
 void FastHeat::GUISetEnabled(GUI_ENABLE_STATE state){
     switch(state){
+    case(GUI_ENABLE_STATE::ENB_STATE_FULL_BLOCK):{
+        ui->lineedit_setpoint->setEnabled(false);
+        ui->pushbutton_run->setEnabled(false);
+        ui->pushbutton_stop->setEnabled(false);
+        this->SetRunningLabel(false);
+        break;
+    }
     case(GUI_ENABLE_STATE::ENB_STOP):{
         ui->lineedit_setpoint->setEnabled(true);
         ui->pushbutton_run->setEnabled(true);
@@ -36,7 +43,7 @@ FastHeat::FastHeat(QWidget *parent) : QWidget(parent), ui(new Ui::FastHeat){
 
     ui->lineedit_setpoint->setValidator(new QDoubleValidator(0, 1000, 2));
 
-    this->GUISetEnabled(GUI_ENABLE_STATE::ENB_STOP);
+    this->GUISetEnabled(GUI_ENABLE_STATE::ENB_STATE_FULL_BLOCK);
 
     this->plot_menu = new QMenu;
     this->plot_menu->addAction("Save Image", this, &FastHeat::slSaveImage);
@@ -245,4 +252,19 @@ void FastHeat::slReceiveRelay(uint16_t relay){
 void FastHeat::slReceiveTemp(float temp){
     this->temperature = temp;
     ui->lcdnumber_actualvalue->display(temp);
+}
+
+void FastHeat::slDisconnectionStop(void){
+    if (this->is_connected){
+        this->is_connected = false;
+        this->slStop();
+        this->GUISetEnabled(GUI_ENABLE_STATE::ENB_STATE_FULL_BLOCK);
+    }
+}
+
+void FastHeat::slConnected(void){
+    if (!(this->is_connected)){
+        this->is_connected = true;
+        this->GUISetEnabled(GUI_ENABLE_STATE::ENB_STOP);
+    }
 }

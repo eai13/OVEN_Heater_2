@@ -20,6 +20,7 @@ public:
 
 private:
     enum GUI_ENABLE_STATE{
+        ENB_STATE_FULL_BLOCK    = 0x00,
         ENB_START_TEMP_NOT_SET  = 0x01,
         ENB_START_TEMP_SET      = 0x02,
         ENB_RUN                 = 0x03
@@ -35,14 +36,16 @@ private:
     QList<QPointF> profile_lookup_table;
     QList<QPointF> profile_discrete;
 
-    bool        is_at_plain = false;
-    float       prev_set_temperature = 0;
-    float       real_temperature = 0;
-    QTime *     global_time = nullptr;
-    QTimer *    run_timer = nullptr;
+    bool        is_connected            = false;
+    bool        is_at_plain             = false;
+    bool        is_prepared             = false;
+    float       prev_set_temperature    = 0;
+    float       real_temperature        = 0;
+    QTime *     global_time             = nullptr;
+    QTimer *    run_timer               = nullptr;
 
-    QMenu * profile_plot_menu = nullptr;
-    QMenu * real_plot_menu = nullptr;
+    QMenu * profile_plot_menu           = nullptr;
+    QMenu * real_plot_menu              = nullptr;
     Ui::ProfileHeat *ui;
 
     void SetRelayLabel(bool state);
@@ -50,12 +53,16 @@ private:
 
 private slots:
     void slRunProcessCallback(void);
+    void slEditFinishedSpeed(void);
+    void slEditFinishedTemp(void);
 
 public slots:
     void slReceiveTemp(float temp);
     void slReceiveRelay(uint16_t relay);
     void slRun(void);
     void slStop(void);
+    void slDisconnectionStop(void);
+    void slConnected(void);
     void slSaveRealImage(void);
     void slSaveRealData(void);
     void slSaveProfileImage(void);

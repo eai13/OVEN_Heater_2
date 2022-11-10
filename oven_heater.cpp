@@ -110,14 +110,15 @@ OVEN_Heater::OVEN_Heater(QWidget *parent) : QMainWindow(parent), ui(new Ui::OVEN
 
     this->fast_heat = new FastHeat;
     ui->verticalLayout->addWidget(this->fast_heat, 0);
-    connect(this->fast_heat, &FastHeat::siStarted, this, &OVEN_Heater::slStarted);
-    connect(this->fast_heat, &FastHeat::siStopped, this, &OVEN_Heater::slStopped);
-    connect(this, &OVEN_Heater::siSendRelay, this->fast_heat, &FastHeat::slReceiveRelay);
-    connect(this, &OVEN_Heater::siSendTemperature, this->fast_heat, &FastHeat::slReceiveTemp);
-    connect(this->fast_heat, &FastHeat::siSendEnable, this, &OVEN_Heater::slReceiveEnable);
-    connect(this->fast_heat, &FastHeat::siSendPID, this, &OVEN_Heater::slReceivePID);
-    connect(this->fast_heat, &FastHeat::siSendSetPoint, this, &OVEN_Heater::slReceiveSetPoint);
-    connect(this, &OVEN_Heater::siConnectionLost, this->fast_heat, &FastHeat::slStop);
+    connect(this->fast_heat,    &FastHeat::siStarted,               this,               &OVEN_Heater::slStarted);
+    connect(this->fast_heat,    &FastHeat::siStopped,               this,               &OVEN_Heater::slStopped);
+    connect(this,               &OVEN_Heater::siSendRelay,          this->fast_heat,    &FastHeat::slReceiveRelay);
+    connect(this,               &OVEN_Heater::siSendTemperature,    this->fast_heat,    &FastHeat::slReceiveTemp);
+    connect(this->fast_heat,    &FastHeat::siSendEnable,            this,               &OVEN_Heater::slReceiveEnable);
+    connect(this->fast_heat,    &FastHeat::siSendPID,               this,               &OVEN_Heater::slReceivePID);
+    connect(this->fast_heat,    &FastHeat::siSendSetPoint,          this,               &OVEN_Heater::slReceiveSetPoint);
+    connect(this,               &OVEN_Heater::siConnectionLost,     this->fast_heat,    &FastHeat::slDisconnectionStop);
+    connect(this,               &OVEN_Heater::siConnected,          this->fast_heat,    &FastHeat::slConnected);
 }
 
 OVEN_Heater::~OVEN_Heater(){
@@ -152,14 +153,15 @@ void OVEN_Heater::slSwitchToFastHeat(bool state){
     if (!state) return;
 
     if (this->profile_heat != nullptr){
-        disconnect(this->profile_heat, &ProfileHeat::siStarted, this, &OVEN_Heater::slStarted);
-        disconnect(this->profile_heat, &ProfileHeat::siStopped, this, &OVEN_Heater::slStopped);
-        disconnect(this, &OVEN_Heater::siSendRelay, this->profile_heat, &ProfileHeat::slReceiveRelay);
-        disconnect(this, &OVEN_Heater::siSendTemperature, this->profile_heat, &ProfileHeat::slReceiveTemp);
-        disconnect(this->profile_heat, &ProfileHeat::siSendEnable, this, &OVEN_Heater::slReceiveEnable);
-        disconnect(this->profile_heat, &ProfileHeat::siSendPID, this, &OVEN_Heater::slReceivePID);
-        disconnect(this->profile_heat, &ProfileHeat::siSendSetPoint, this, &OVEN_Heater::slReceiveSetPoint);
-        disconnect(this, &OVEN_Heater::siConnectionLost, this->profile_heat, &ProfileHeat::slStop);
+        disconnect(this->profile_heat,  &ProfileHeat::siStarted,            this,               &OVEN_Heater::slStarted);
+        disconnect(this->profile_heat,  &ProfileHeat::siStopped,            this,               &OVEN_Heater::slStopped);
+        disconnect(this,                &OVEN_Heater::siSendRelay,          this->profile_heat, &ProfileHeat::slReceiveRelay);
+        disconnect(this,                &OVEN_Heater::siSendTemperature,    this->profile_heat, &ProfileHeat::slReceiveTemp);
+        disconnect(this->profile_heat,  &ProfileHeat::siSendEnable,         this,               &OVEN_Heater::slReceiveEnable);
+        disconnect(this->profile_heat,  &ProfileHeat::siSendPID,            this,               &OVEN_Heater::slReceivePID);
+        disconnect(this->profile_heat,  &ProfileHeat::siSendSetPoint,       this,               &OVEN_Heater::slReceiveSetPoint);
+        disconnect(this,                &OVEN_Heater::siConnectionLost,     this->profile_heat, &ProfileHeat::slDisconnectionStop);
+        disconnect(this,                &OVEN_Heater::siConnected,          this->profile_heat, &ProfileHeat::slConnected);
         ui->verticalLayout->removeWidget(this->profile_heat);
         delete this->profile_heat;
         this->profile_heat = nullptr;
@@ -167,55 +169,59 @@ void OVEN_Heater::slSwitchToFastHeat(bool state){
     this->fast_heat = new FastHeat;
     this->filename = "";
     ui->verticalLayout->addWidget(this->fast_heat, 0);
-    connect(this->fast_heat, &FastHeat::siStarted, this, &OVEN_Heater::slStarted);
-    connect(this->fast_heat, &FastHeat::siStopped, this, &OVEN_Heater::slStopped);
-    connect(this, &OVEN_Heater::siSendRelay, this->fast_heat, &FastHeat::slReceiveRelay);
-    connect(this, &OVEN_Heater::siSendTemperature, this->fast_heat, &FastHeat::slReceiveTemp);
-    connect(this->fast_heat, &FastHeat::siSendEnable, this, &OVEN_Heater::slReceiveEnable);
-    connect(this->fast_heat, &FastHeat::siSendPID, this, &OVEN_Heater::slReceivePID);
-    connect(this->fast_heat, &FastHeat::siSendSetPoint, this, &OVEN_Heater::slReceiveSetPoint);
-    connect(this, &OVEN_Heater::siConnectionLost, this->fast_heat, &FastHeat::slStop);
+    connect(this->fast_heat,    &FastHeat::siStarted,               this,               &OVEN_Heater::slStarted);
+    connect(this->fast_heat,    &FastHeat::siStopped,               this,               &OVEN_Heater::slStopped);
+    connect(this,               &OVEN_Heater::siSendRelay,          this->fast_heat,    &FastHeat::slReceiveRelay);
+    connect(this,               &OVEN_Heater::siSendTemperature,    this->fast_heat,    &FastHeat::slReceiveTemp);
+    connect(this->fast_heat,    &FastHeat::siSendEnable,            this,               &OVEN_Heater::slReceiveEnable);
+    connect(this->fast_heat,    &FastHeat::siSendPID,               this,               &OVEN_Heater::slReceivePID);
+    connect(this->fast_heat,    &FastHeat::siSendSetPoint,          this,               &OVEN_Heater::slReceiveSetPoint);
+    connect(this,               &OVEN_Heater::siConnectionLost,     this->fast_heat,    &FastHeat::slDisconnectionStop);
+    connect(this,               &OVEN_Heater::siConnected,          this->fast_heat,    &FastHeat::slConnected);
 }
 
 void OVEN_Heater::slSwitchToProfileHeat(bool state){
     if (!state) return;
 
     if (this->fast_heat != nullptr){
-        disconnect(this->fast_heat, &FastHeat::siStarted, this, &OVEN_Heater::slStarted);
-        disconnect(this->fast_heat, &FastHeat::siStopped, this, &OVEN_Heater::slStopped);
-        disconnect(this, &OVEN_Heater::siSendRelay, this->fast_heat, &FastHeat::slReceiveRelay);
-        disconnect(this, &OVEN_Heater::siSendTemperature, this->fast_heat, &FastHeat::slReceiveTemp);
-        disconnect(this->fast_heat, &FastHeat::siSendEnable, this, &OVEN_Heater::slReceiveEnable);
-        disconnect(this->fast_heat, &FastHeat::siSendPID, this, &OVEN_Heater::slReceivePID);
-        disconnect(this->fast_heat, &FastHeat::siSendSetPoint, this, &OVEN_Heater::slReceiveSetPoint);
-        disconnect(this, &OVEN_Heater::siConnectionLost, this->fast_heat, &FastHeat::slStop);
+        disconnect(this->fast_heat, &FastHeat::siStarted,               this,               &OVEN_Heater::slStarted);
+        disconnect(this->fast_heat, &FastHeat::siStopped,               this,               &OVEN_Heater::slStopped);
+        disconnect(this,            &OVEN_Heater::siSendRelay,          this->fast_heat,    &FastHeat::slReceiveRelay);
+        disconnect(this,            &OVEN_Heater::siSendTemperature,    this->fast_heat,    &FastHeat::slReceiveTemp);
+        disconnect(this->fast_heat, &FastHeat::siSendEnable,            this,               &OVEN_Heater::slReceiveEnable);
+        disconnect(this->fast_heat, &FastHeat::siSendPID,               this,               &OVEN_Heater::slReceivePID);
+        disconnect(this->fast_heat, &FastHeat::siSendSetPoint,          this,               &OVEN_Heater::slReceiveSetPoint);
+        disconnect(this,            &OVEN_Heater::siConnectionLost,     this->fast_heat,    &FastHeat::slDisconnectionStop);
+        disconnect(this,            &OVEN_Heater::siConnected,          this->fast_heat,    &FastHeat::slConnected);
         ui->verticalLayout->removeWidget(this->fast_heat);
         delete this->fast_heat;
         this->fast_heat = nullptr;
     }
     if (this->profile_heat != nullptr){
-        disconnect(this->profile_heat, &ProfileHeat::siStarted, this, &OVEN_Heater::slStarted);
-        disconnect(this->profile_heat, &ProfileHeat::siStopped, this, &OVEN_Heater::slStopped);
-        disconnect(this, &OVEN_Heater::siSendRelay, this->profile_heat, &ProfileHeat::slReceiveRelay);
-        disconnect(this, &OVEN_Heater::siSendTemperature, this->profile_heat, &ProfileHeat::slReceiveTemp);
-        disconnect(this->profile_heat, &ProfileHeat::siSendEnable, this, &OVEN_Heater::slReceiveEnable);
-        disconnect(this->profile_heat, &ProfileHeat::siSendPID, this, &OVEN_Heater::slReceivePID);
-        disconnect(this->profile_heat, &ProfileHeat::siSendSetPoint, this, &OVEN_Heater::slReceiveSetPoint);
-        disconnect(this, &OVEN_Heater::siConnectionLost, this->profile_heat, &ProfileHeat::slStop);
+        disconnect(this->profile_heat,  &ProfileHeat::siStarted,            this,               &OVEN_Heater::slStarted);
+        disconnect(this->profile_heat,  &ProfileHeat::siStopped,            this,               &OVEN_Heater::slStopped);
+        disconnect(this,                &OVEN_Heater::siSendRelay,          this->profile_heat, &ProfileHeat::slReceiveRelay);
+        disconnect(this,                &OVEN_Heater::siSendTemperature,    this->profile_heat, &ProfileHeat::slReceiveTemp);
+        disconnect(this->profile_heat,  &ProfileHeat::siSendEnable,         this,               &OVEN_Heater::slReceiveEnable);
+        disconnect(this->profile_heat,  &ProfileHeat::siSendPID,            this,               &OVEN_Heater::slReceivePID);
+        disconnect(this->profile_heat,  &ProfileHeat::siSendSetPoint,       this,               &OVEN_Heater::slReceiveSetPoint);
+        disconnect(this,                &OVEN_Heater::siConnectionLost,     this->profile_heat, &ProfileHeat::slDisconnectionStop);
+        disconnect(this,                &OVEN_Heater::siConnected,          this->profile_heat, &ProfileHeat::slConnected);
         ui->verticalLayout->removeWidget(this->profile_heat);
         delete this->profile_heat;
         this->profile_heat = nullptr;
     }
     this->profile_heat = new ProfileHeat((this->filename.isEmpty()) ? ("") : (this->filename));
     ui->verticalLayout->addWidget(this->profile_heat, 0);
-    connect(this->profile_heat, &ProfileHeat::siStarted, this, &OVEN_Heater::slStarted);
-    connect(this->profile_heat, &ProfileHeat::siStopped, this, &OVEN_Heater::slStopped);
-    connect(this, &OVEN_Heater::siSendRelay, this->profile_heat, &ProfileHeat::slReceiveRelay);
-    connect(this, &OVEN_Heater::siSendTemperature, this->profile_heat, &ProfileHeat::slReceiveTemp);
-    connect(this->profile_heat, &ProfileHeat::siSendEnable, this, &OVEN_Heater::slReceiveEnable);
-    connect(this->profile_heat, &ProfileHeat::siSendPID, this, &OVEN_Heater::slReceivePID);
-    connect(this->profile_heat, &ProfileHeat::siSendSetPoint, this, &OVEN_Heater::slReceiveSetPoint);
-    connect(this, &OVEN_Heater::siConnectionLost, this->profile_heat, &ProfileHeat::slStop);
+    connect(this->profile_heat, &ProfileHeat::siStarted,            this,               &OVEN_Heater::slStarted);
+    connect(this->profile_heat, &ProfileHeat::siStopped,            this,               &OVEN_Heater::slStopped);
+    connect(this,               &OVEN_Heater::siSendRelay,          this->profile_heat, &ProfileHeat::slReceiveRelay);
+    connect(this,               &OVEN_Heater::siSendTemperature,    this->profile_heat, &ProfileHeat::slReceiveTemp);
+    connect(this->profile_heat, &ProfileHeat::siSendEnable,         this,               &OVEN_Heater::slReceiveEnable);
+    connect(this->profile_heat, &ProfileHeat::siSendPID,            this,               &OVEN_Heater::slReceivePID);
+    connect(this->profile_heat, &ProfileHeat::siSendSetPoint,       this,               &OVEN_Heater::slReceiveSetPoint);
+    connect(this,               &OVEN_Heater::siConnectionLost,     this->profile_heat, &ProfileHeat::slDisconnectionStop);
+    connect(this,               &OVEN_Heater::siConnected,          this->profile_heat, &ProfileHeat::slConnected);
 }
 
 void OVEN_Heater::slSaveExperiment(void){
@@ -380,6 +386,7 @@ void OVEN_Heater::slSerialRxProcess(void){
             emit this->siSendTemperature(temp);
             emit this->siSendRelay(relay);
             this->ConnectionOK = true;
+            emit this->siConnected();
             break;
         }
         case(0x10):{

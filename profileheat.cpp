@@ -8,6 +8,19 @@
 
 void ProfileHeat::GUISetEnabled(GUI_ENABLE_STATE state){
     switch(state){
+    case(GUI_ENABLE_STATE::ENB_STATE_FULL_BLOCK):{
+        ui->lineedit_pointspeed->setEnabled(false);
+        ui->lineedit_pointtemp->setEnabled(false);
+        ui->pushbutton_addpoint->setEnabled(false);
+        ui->pushbutton_clearpoints->setEnabled(false);
+        ui->pushbutton_removepoint->setEnabled(false);
+        ui->pushbutton_run->setEnabled(false);
+        ui->pushbutton_stop->setEnabled(false);
+        ui->pushbutton_setstarttemp->setEnabled(false);
+        ui->lineedit_starttemp->setEnabled(false);
+        this->SetRunningLabel(false);
+        break;
+    }
     case(GUI_ENABLE_STATE::ENB_START_TEMP_NOT_SET):{
         ui->lineedit_pointspeed->setEnabled(false);
         ui->lineedit_pointtemp->setEnabled(false);
@@ -68,10 +81,10 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
     ui->setupUi(this);
 
     ui->lineedit_pointspeed->setValidator(new QDoubleValidator(0, 25, 2));
-    ui->lineedit_pointtemp->setValidator(new QDoubleValidator(20, 1000, 2));
-    ui->lineedit_starttemp->setValidator(new QDoubleValidator(20, 1000, 2));
+    ui->lineedit_pointtemp->setValidator(new QDoubleValidator(0, 1000, 2));
+    ui->lineedit_starttemp->setValidator(new QDoubleValidator(0, 1000, 2));
 
-    this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_NOT_SET);
+    this->GUISetEnabled(GUI_ENABLE_STATE::ENB_STATE_FULL_BLOCK);
 
     this->profile_plot_menu = new QMenu;
     this->profile_plot_menu->addAction("Save Image", this, &ProfileHeat::slSaveProfileImage);
@@ -96,7 +109,6 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
     ui->widget_profileplot->addGraph()->setPen(QPen(Qt::red));
 
     if (!(from_file.isEmpty())){
-        qDebug() << "FROM FILE : " << from_file;
         QFile file(from_file);
         if (file.open(QIODevice::ReadOnly)){
             QDataStream stream(&file);
@@ -109,7 +121,6 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
                 this->profile_lookup_table.push_back(QPointF(key, value));
                 ui->widget_profileplot->graph(0)->addData(key, value);
                 ui->lineedit_starttemp->setText(QString::asprintf("%.2f", value));
-                this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_SET);
                 data_count--;
                 while(data_count--){
                     stream >> key;
@@ -134,6 +145,8 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
     connect(ui->pushbutton_addpoint, &QPushButton::released, this, &ProfileHeat::slAddProfilePoint);
     connect(ui->pushbutton_removepoint, &QPushButton::released, this, &ProfileHeat::slRemoveProfilePoint);
     connect(ui->pushbutton_clearpoints, &QPushButton::released, this, &ProfileHeat::slClearProfile);
+    connect(ui->lineedit_pointtemp, &QLineEdit::textEdited, this, &ProfileHeat::slEditFinishedTemp);
+    connect(ui->lineedit_pointspeed, &QLineEdit::textEdited, this, &ProfileHeat::slEditFinishedSpeed);
 
     this->global_time = new QTime;
     this->run_timer = new QTimer;
@@ -175,24 +188,16 @@ void ProfileHeat::SetRunningLabel(bool state){
 
 void ProfileHeat::slRun(void){
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_RUN);
-    qDebug() << "HERE";
     this->profile_discrete.push_back(this->profile_lookup_table.front());
     for (auto iter = (++(this->profile_lookup_table.begin())); iter != this->profile_lookup_table.end(); iter++){
         QPointF current = this->profile_discrete.back();
         QPointF next = (*iter);
         uint32_t points_amount = (next - current).x() / TIME_DISCRETE;
         float temp_inc = (next.y() - current.y()) / points_amount;
-        qDebug() << "POINTS AMOUNT: " << points_amount;
-        qDebug() << "TEMP INCREMENT: " << temp_inc;
 
         for (float temp = current.y(), time = current.x(); points_amount--; ){
-//            ui->widget_realplot->graph(0)->addData(time + TIME_DISCRETE, temp + temp_inc);
             this->profile_discrete.push_back(QPointF(time += TIME_DISCRETE, temp += temp_inc));
         }
-//        ui->widget_realplot->rescaleAxes();
-//        ui->widget_realplot->xAxis->setRangeLower(0);
-//        ui->widget_realplot->yAxis->setRangeLower(0);
-//        ui->widget_realplot->replot();
     }
 
     emit this->siSendEnable(1);
@@ -207,11 +212,18 @@ void ProfileHeat::slRunProcessCallback(void){
         this->is_at_plain = true;
         requested_temp = this->prev_set_temperature;
     }
+    else if (!(this->is_prepared)){
+        requested_temp = this->profile_discrete.front().y();
+        if (std::abs(requested_temp - this->real_temperature) < 1.0001){
+            this->is_prepared = true;
+        }
+        emit this->siSendSetPoint(requested_temp);
+    }
     else{
-        float requested_time = this->profile_discrete.back().x();
-        requested_temp = this->profile_discrete.back().y();
+        float requested_time = this->profile_discrete.front().x();
+        requested_temp = this->profile_discrete.front().y();
         if (requested_time <= current_time){
-            this->profile_discrete.pop_back();
+            this->profile_discrete.pop_front();
             if (std::abs(this->prev_set_temperature - requested_temp) < 0.0001) this->is_at_plain = true;
             else this->is_at_plain = false;
             this->prev_set_temperature = requested_temp;
@@ -423,22 +435,41 @@ void ProfileHeat::slAddProfilePoint(void){
     if ((ui->lineedit_pointspeed->text().isEmpty()) || (ui->lineedit_pointtemp->text().isEmpty())) return;
 
     QString txt_speed = ui->lineedit_pointspeed->text();
+    for (auto iter = txt_speed.begin(); iter != txt_speed.end(); iter++)
+        if (*iter == ',') *iter = '.';
     QString txt_temp = ui->lineedit_pointtemp->text();
+    for (auto iter = txt_temp.begin(); iter != txt_temp.end(); iter++)
+        if (*iter == ',') *iter = '.';
     double cur_temp = txt_temp.toDouble();
     double speed = txt_speed.toDouble();
-    double prev_temp = (ui->widget_profileplot->graph(0)->data()->end() - 1)->value;
-    double prev_time = (ui->widget_profileplot->graph(0)->data()->end() - 1)->key;
+    double prev_temp = this->profile_lookup_table.back().y();
+    double prev_time = this->profile_lookup_table.back().x();
 
-    this->profile_lookup_table.push_back(QPointF(prev_time + abs((cur_temp - prev_temp) / speed) * 60, cur_temp));
-    ui->widget_profileplot->graph(0)->addData(prev_time + abs((cur_temp - prev_temp) / speed) * 60, cur_temp);
+    if (std::abs(speed - 0) < 0.0001){
+        this->profile_lookup_table.push_back(QPointF(prev_time + cur_temp * 60, prev_temp));
+    }
+    else if (std::abs(cur_temp - this->profile_lookup_table.back().y()) < 0.0001){
+        this->profile_lookup_table.push_back(QPointF(prev_time + speed * 60, prev_temp));
+    }
+    else{
+        this->profile_lookup_table.push_back(QPointF(prev_time + abs((cur_temp - prev_temp) / speed) * 60, cur_temp));
+    }
+    ui->widget_profileplot->graph(0)->addData(this->profile_lookup_table.back().x(), this->profile_lookup_table.back().y());
     ui->widget_profileplot->rescaleAxes();
     ui->widget_profileplot->yAxis->setRangeLower(0);
     ui->widget_profileplot->xAxis->setRangeLower(0);
     ui->widget_profileplot->replot();
+
+    ui->lineedit_pointspeed->setText("");
+    ui->lineedit_pointtemp->setText("");
 }
 
 void ProfileHeat::slRemoveProfilePoint(void){
-    if (ui->widget_profileplot->graph(0)->dataCount() == 1){
+    if (this->profile_lookup_table.isEmpty()){
+        this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_NOT_SET);
+        return;
+    }
+    if (this->profile_lookup_table.size() == 1){
         this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_NOT_SET);
     }
 
@@ -483,4 +514,57 @@ void ProfileHeat::slReceiveTemp(float temp){
 }
 void ProfileHeat::slReceiveRelay(uint16_t relay){
     this->SetRelayLabel(relay);
+}
+
+void ProfileHeat::slDisconnectionStop(void){
+    if (this->is_connected){
+        this->is_connected = false;
+        this->slStop();
+        this->GUISetEnabled(GUI_ENABLE_STATE::ENB_STATE_FULL_BLOCK);
+    }
+}
+
+void ProfileHeat::slConnected(void){
+    if (!(this->is_connected)){
+        this->is_connected = true;
+        if (!(this->profile_lookup_table.isEmpty())){
+            this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_SET);
+        }
+        else{
+            this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_NOT_SET);
+        }
+    }
+}
+
+void ProfileHeat::slEditFinishedSpeed(void){
+    qWarning() << "EDIT FINISHED SPEED";
+    if (ui->lineedit_pointspeed->text().isEmpty()){
+        ui->lineedit_pointtemp->setPlaceholderText("Point Temperature, C");
+        return;
+    }
+    QString speed_text = ui->lineedit_pointspeed->text();
+    for (auto iter = speed_text.begin(); iter != speed_text.end(); iter++)
+        if (*iter == ',') *iter = '.';
+    if (std::abs(speed_text.toFloat() - 0) < 0.00001){
+        ui->lineedit_pointtemp->setPlaceholderText("Plane Time, min");
+    }
+    else{
+        ui->lineedit_pointtemp->setPlaceholderText("Point Temperature, C");
+    }
+}
+void ProfileHeat::slEditFinishedTemp(void){
+    qWarning() << "EDIT FINISHED TEMP";
+    if (ui->lineedit_pointtemp->text().isEmpty()){
+        ui->lineedit_pointspeed->setPlaceholderText("Point Speed, C/min");
+        return;
+    }
+    QString temp_text = ui->lineedit_pointtemp->text();
+    for (auto iter = temp_text.begin(); iter != temp_text.end(); iter++)
+        if (*iter == ',') *iter = '.';
+    if (std::abs(temp_text.toFloat() - this->profile_lookup_table.back().y()) < 0.0001){
+        ui->lineedit_pointspeed->setPlaceholderText("Plane Time, min");
+    }
+    else{
+        ui->lineedit_pointspeed->setPlaceholderText("Point Speed, C/min");
+    }
 }

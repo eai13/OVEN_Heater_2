@@ -20,8 +20,9 @@ public:
 
 private:
     enum GUI_ENABLE_STATE{
-        ENB_RUN     = 0x01,
-        ENB_STOP    = 0x02
+        ENB_STATE_FULL_BLOCK    = 0x00,
+        ENB_RUN                 = 0x01,
+        ENB_STOP                = 0x02
     };
     enum PID_NUMBER{
         PID_RAMP        = 0x01,
@@ -32,6 +33,7 @@ private:
     float temperature = 0;
     bool is_at_plane = false;
 
+    bool is_connected = false;
     void GUISetEnabled(GUI_ENABLE_STATE state);
 
     QTime *     global_time = nullptr;
@@ -54,6 +56,8 @@ public slots:
     void slReceiveRelay(uint16_t relay);
     void slRun(void);
     void slStop(void);
+    void slDisconnectionStop(void);
+    void slConnected(void);
     void slSaveImage(void);
     void slSaveData(void);
     void slSaveAll(void);
