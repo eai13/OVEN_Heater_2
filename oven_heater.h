@@ -101,6 +101,8 @@ public slots:
     }
 
 private slots:
+    void slExit(void);
+
     void slSerialTimeout(void);
     void slSerialPing(void);
     void slSerialRxProcess(void);

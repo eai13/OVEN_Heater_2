@@ -69,14 +69,18 @@ FastHeat::FastHeat(QWidget *parent) : QWidget(parent), ui(new Ui::FastHeat){
 }
 
 FastHeat::~FastHeat(void){
-    delete this->plot_menu;
+    if (this->plot_menu != nullptr){
+        delete this->plot_menu;
+    }
     if (this->run_timer != nullptr){
         if (this->run_timer->isActive()){
             this->run_timer->stop();
         }
         delete this->run_timer;
     }
-    delete this->global_time;
+    if (this->global_time != nullptr){
+        delete this->global_time;
+    }
     delete ui;
 }
 
@@ -95,6 +99,8 @@ void FastHeat::SetRunningLabel(bool state){
 }
 
 void FastHeat::slRun(void){
+    emit this->siStarted();
+
     if (ui->lineedit_setpoint->text().isEmpty()) return;
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_RUN);
 
@@ -120,6 +126,8 @@ void FastHeat::slStop(void){
     emit this->siSendEnable(0);
 
     this->run_timer->stop();
+
+    emit this->siStopped();
 }
 
 void FastHeat::slRunTimerProcess(void){

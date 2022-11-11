@@ -187,6 +187,8 @@ void ProfileHeat::SetRunningLabel(bool state){
 }
 
 void ProfileHeat::slRun(void){
+    emit this->siStarted();
+
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_RUN);
     this->profile_discrete.push_back(this->profile_lookup_table.front());
     for (auto iter = (++(this->profile_lookup_table.begin())); iter != this->profile_lookup_table.end(); iter++){
@@ -254,6 +256,8 @@ void ProfileHeat::slStop(void){
     this->profile_discrete.clear();
     this->run_timer->stop();
     emit this->siSendEnable(0);
+
+    emit this->siStopped();
 }
 
 void ProfileHeat::slSaveRealImage(void){

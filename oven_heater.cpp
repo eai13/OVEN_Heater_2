@@ -23,6 +23,8 @@
 OVEN_Heater::OVEN_Heater(QWidget *parent) : QMainWindow(parent), ui(new Ui::OVEN_Heater){
     ui->setupUi(this);
 
+    this->setWindowFlags(this->windowFlags() & ~(Qt::WindowCloseButtonHint));
+
     QFile json_file(CONFIG_FILENAME);
     if ((json_file.exists()) && (json_file.open(QIODevice::ReadOnly | QIODevice::Text))){
         QString json_text = json_file.readAll();
@@ -87,12 +89,13 @@ OVEN_Heater::OVEN_Heater(QWidget *parent) : QMainWindow(parent), ui(new Ui::OVEN
     connect(this->serial_ping_timer, &QTimer::timeout, this, &OVEN_Heater::slSerialPing);
     this->serial_ping_timer->start(1000);
 
-    connect(ui->action_fast_heating, &QAction::toggled, this, &OVEN_Heater::slSwitchToFastHeat);
-    connect(ui->action_profile_heating, &QAction::toggled, this, &OVEN_Heater::slSwitchToProfileHeat);
-    connect(ui->action_save_experiment_as, &QAction::triggered, this, &OVEN_Heater::slSaveExperiment);
-    connect(ui->action_load_experiment, &QAction::triggered, this, &OVEN_Heater::slUploadExperiment);
-    connect(ui->action_modbus_settings, &QAction::triggered, this, &OVEN_Heater::slShowMODBUSConfig);
-    connect(ui->action_serial_settings, &QAction::triggered, this, &OVEN_Heater::slShowSerialConfig);
+    connect(ui->action_fast_heating,        &QAction::toggled,      this, &OVEN_Heater::slSwitchToFastHeat);
+    connect(ui->action_profile_heating,     &QAction::toggled,      this, &OVEN_Heater::slSwitchToProfileHeat);
+    connect(ui->action_save_experiment_as,  &QAction::triggered,    this, &OVEN_Heater::slSaveExperiment);
+    connect(ui->action_load_experiment,     &QAction::triggered,    this, &OVEN_Heater::slUploadExperiment);
+    connect(ui->action_modbus_settings,     &QAction::triggered,    this, &OVEN_Heater::slShowMODBUSConfig);
+    connect(ui->action_serial_settings,     &QAction::triggered,    this, &OVEN_Heater::slShowSerialConfig);
+    connect(ui->action_exit,                &QAction::triggered,    this, &OVEN_Heater::slExit);
 
     this->setWindowIcon(                QIcon(":/ICONS/ICONS/MAIN_icon.png"));
     ui->action_profile_heating->setIcon(QIcon(":/ICONS/ICONS/PH_icon.png"));
@@ -102,6 +105,7 @@ OVEN_Heater::OVEN_Heater(QWidget *parent) : QMainWindow(parent), ui(new Ui::OVEN
     ui->action_serial_settings->setIcon(QIcon(":/ICONS/ICONS/RS485_icon.png"));
     ui->action_save_experiment->setIcon(QIcon(":/ICONS/ICONS/SAVE_icon.png"));
     ui->action_save_experiment_as->setIcon(QIcon(":/ICONS/ICONS/SAVEAS_icon.png"));
+    ui->action_exit->setIcon(           QIcon(":/ICONS/ICONS/EXIT_icon.png"));
 
     QActionGroup * action_group = new QActionGroup(this);
     action_group->setExclusive(true);
@@ -139,6 +143,12 @@ OVEN_Heater::~OVEN_Heater(){
             this->serial_timeout_timer->stop();
         }
         delete this->serial_timeout_timer;
+    }
+    if (this->serial != nullptr){
+        if (this->serial->isOpen()){
+            this->serial->close();
+        }
+        delete this->serial;
     }
     if (this->fast_heat != nullptr){
         delete this->fast_heat;
@@ -467,8 +477,11 @@ void OVEN_Heater::slSerialQueueProcess(void){
 
 void OVEN_Heater::slSerialTimeout(void){
     this->bytes_awaited = 0;
-//    if (this->serial->bytesAvailable()) this->serial->readAll();
     this->ConnectionOK = false;
 
     emit this->siConnectionLost();
+}
+
+void OVEN_Heater::slExit(void){
+    this->~OVEN_Heater();
 }

@@ -8,5 +8,6 @@
         <file>ICONS/SAVEAS_icon.png</file>
         <file>ICONS/UPLOAD_icon.png</file>
         <file>ICONS/MAIN_icon.png</file>
+        <file>ICONS/EXIT_icon.png</file>
     </qresource>
 </RCC>

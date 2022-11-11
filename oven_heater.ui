@@ -126,6 +126,8 @@
     <addaction name="separator"/>
     <addaction name="action_fast_heating"/>
     <addaction name="action_profile_heating"/>
+    <addaction name="separator"/>
+    <addaction name="action_exit"/>
    </widget>
    <addaction name="menuMenu"/>
    <addaction name="menuSerial_Setup"/>
@@ -182,6 +184,11 @@
   <action name="action_save_experiment_as">
    <property name="text">
     <string>Save Experiment As</string>
+   </property>
+  </action>
+  <action name="action_exit">
+   <property name="text">
+    <string>Exit</string>
    </property>
   </action>
  </widget>
