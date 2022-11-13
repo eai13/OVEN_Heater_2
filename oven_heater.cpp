@@ -151,9 +151,11 @@ OVEN_Heater::~OVEN_Heater(){
         delete this->serial;
     }
     if (this->fast_heat != nullptr){
+        ui->verticalLayout->removeWidget(this->fast_heat);
         delete this->fast_heat;
     }
     if (this->profile_heat != nullptr){
+        ui->verticalLayout->removeWidget(this->profile_heat);
         delete this->profile_heat;
     }
     delete ui;
@@ -483,5 +485,5 @@ void OVEN_Heater::slSerialTimeout(void){
 }
 
 void OVEN_Heater::slExit(void){
-    this->~OVEN_Heater();
+    this->close();
 }

@@ -45,9 +45,6 @@ private:
     void SetRelayLabel(bool state);
     void SetRunningLabel(bool state);
 
-//    QTimer * UpdateCurrentTempTimer = nullptr;
-//    QTimer * SendSetpointTimer = nullptr;
-
 private slots:
     void slRunTimerProcess(void);
 
@@ -62,9 +59,6 @@ public slots:
     void slSaveData(void);
     void slSaveAll(void);
     void slShowPlotMenu(const QPoint & pos);
-
-//    void slUpdateCurrentTemp(void);
-//    void slSendSetpoint(void);
 
 signals:
     void siSendEnable(uint16_t enb);
