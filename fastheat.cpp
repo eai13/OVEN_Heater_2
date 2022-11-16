@@ -55,8 +55,8 @@ FastHeat::FastHeat(QWidget *parent) : QWidget(parent), ui(new Ui::FastHeat){
     connect(ui->pushbutton_stop, &QPushButton::released, this, &FastHeat::slStop);
     connect(ui->widget_realplot, &QWidget::customContextMenuRequested, this, &FastHeat::slShowPlotMenu);
 
-    ui->widget_realplot->xAxis->setLabel("Time, s");
-    ui->widget_realplot->yAxis->setLabel("Temperature, C");
+    ui->widget_realplot->xAxis->setLabel("Время, с");
+    ui->widget_realplot->yAxis->setLabel("Температура, C");
     ui->widget_realplot->addGraph()->setPen(QPen(Qt::red));
     ui->widget_realplot->rescaleAxes();
     ui->widget_realplot->xAxis->setRangeLower(0);
@@ -164,7 +164,7 @@ void FastHeat::slSaveImage(void){
     QString filter;
     QString filename = QFileDialog::getSaveFileName(
                 this,
-                "Save Plot Image To...",
+                "Сохранить Изображение...",
                 ".",
                 "PNG (*.png);;JPG (*.jpg);;BMP (*.bmp)",
                 &filter);
@@ -185,7 +185,7 @@ void FastHeat::slSaveData(void){
     QString filter;
     QString filename = QFileDialog::getSaveFileName(
                 this,
-                "Save Plot Data To...",
+                "Сохранить Данные...",
                 ".",
                 "CSV (*.csv)",
                 &filter);
@@ -195,7 +195,7 @@ void FastHeat::slSaveData(void){
         QFile file(filename);
         if (file.open(QIODevice::WriteOnly)){
             QTextStream stream(&file);
-            stream << "Time, s;Temperature, C" << endl;
+            stream << "Время, с;Температура, C" << endl;
             QSharedPointer<QCPGraphDataContainer> datacontainer = ui->widget_realplot->graph(0)->data();
             for (auto iter = datacontainer->begin(); iter != datacontainer->end(); iter++){
                 QString tmp_value = QString::asprintf("%.2f", iter->value);
@@ -212,7 +212,7 @@ void FastHeat::slSaveAll(void){
     QString filter;
     QString filename = QFileDialog::getSaveFileName(
                 this,
-                "Save Experiment Data To...",
+                "Сохранить Данные Эксперимента...",
                 ".",
                 "PNG CSV_Comma;;JPG CSV_Comma;;BMP CSV_Comma",
                 &filter);
@@ -223,7 +223,7 @@ void FastHeat::slSaveAll(void){
     if (filter.endsWith("CSV_Comma")){
         if (file.open(QIODevice::WriteOnly)){
             QTextStream stream(&file);
-            stream << "Time, s;Temperature, C" << endl;
+            stream << "Время, с;Температура, C" << endl;
             QSharedPointer<QCPGraphDataContainer> datacontainer = ui->widget_realplot->graph(0)->data();
             for (auto iter = datacontainer->begin(); iter != datacontainer->end(); iter++){
                 QString tmp_value = QString::asprintf("%.2f", iter->value);

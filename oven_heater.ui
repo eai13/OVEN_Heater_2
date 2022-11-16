@@ -89,7 +89,7 @@
          </size>
         </property>
         <property name="text">
-         <string>Scanning Ports</string>
+         <string>Поиск Устройств</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -111,14 +111,14 @@
    </property>
    <widget class="QMenu" name="menuSerial_Setup">
     <property name="title">
-     <string>Configuration Settings</string>
+     <string>Конфигурация</string>
     </property>
     <addaction name="action_serial_settings"/>
     <addaction name="action_modbus_settings"/>
    </widget>
    <widget class="QMenu" name="menuMenu">
     <property name="title">
-     <string>Menu</string>
+     <string>Меню</string>
     </property>
     <addaction name="action_save_experiment"/>
     <addaction name="action_save_experiment_as"/>
@@ -135,7 +135,7 @@
   <widget class="QStatusBar" name="statusbar"/>
   <action name="action_load_experiment">
    <property name="text">
-    <string>Load Experiment</string>
+    <string>Загрузить Эксперимент</string>
    </property>
   </action>
   <action name="action_fast_heating">
@@ -146,7 +146,7 @@
     <bool>true</bool>
    </property>
    <property name="text">
-    <string>Fast Heating</string>
+    <string>Быстрый Нагрев</string>
    </property>
    <property name="priority">
     <enum>QAction::NormalPriority</enum>
@@ -160,7 +160,7 @@
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>Profile Heating</string>
+    <string>Профильный Нагрев</string>
    </property>
    <property name="priority">
     <enum>QAction::NormalPriority</enum>
@@ -168,27 +168,27 @@
   </action>
   <action name="action_serial_settings">
    <property name="text">
-    <string>Serial Settings</string>
+    <string>Настройки Последовательного Порта</string>
    </property>
   </action>
   <action name="action_modbus_settings">
    <property name="text">
-    <string>MODBUS Settings</string>
+    <string>Настройки MODBUS</string>
    </property>
   </action>
   <action name="action_save_experiment">
    <property name="text">
-    <string>Save Experiment</string>
+    <string>Сохранить Эксперимент</string>
    </property>
   </action>
   <action name="action_save_experiment_as">
    <property name="text">
-    <string>Save Experiment As</string>
+    <string>Сохранить Эксперимент как ...</string>
    </property>
   </action>
   <action name="action_exit">
    <property name="text">
-    <string>Exit</string>
+    <string>Выйти</string>
    </property>
   </action>
  </widget>

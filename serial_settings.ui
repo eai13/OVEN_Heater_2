@@ -48,7 +48,7 @@
       </font>
      </property>
      <property name="title">
-      <string>Serial Settings</string>
+      <string>Настройки Последовательного Порта</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -76,7 +76,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Baud Rate</string>
+         <string>Частота Бод</string>
         </property>
        </widget>
       </item>
@@ -102,7 +102,7 @@
          </font>
         </property>
         <property name="placeholderText">
-         <string>Classic Baud Rate 9600, 19200, ...</string>
+         <string>Частота Бод 9600, 19200, ...</string>
         </property>
        </widget>
       </item>
@@ -130,7 +130,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Apply</string>
+           <string>Принять</string>
           </property>
          </widget>
         </item>
@@ -156,7 +156,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Cancel</string>
+           <string>Закрыть</string>
           </property>
          </widget>
         </item>

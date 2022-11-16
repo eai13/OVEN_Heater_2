@@ -240,7 +240,7 @@ void OVEN_Heater::slSaveExperiment(void){
     if (this->profile_heat != nullptr){
         QString fname = QFileDialog::getSaveFileName(
                     this,
-                    "Save Experiment To...",
+                    "Сохранить Эксперимент...",
                     ".",
                     "OHE Files (*.ohe)");
         if (fname.isEmpty()) return;
@@ -252,7 +252,7 @@ void OVEN_Heater::slSaveExperiment(void){
 void OVEN_Heater::slUploadExperiment(void){
     QString fname = QFileDialog::getOpenFileName(
                 this,
-                "Upload Experiment...",
+                "Загрузить Эксперимент...",
                 ".",
                 "OHE Files (*.ohe)");
     if (fname.isEmpty()) return;
@@ -392,17 +392,20 @@ void OVEN_Heater::slSerialRxProcess(void){
         uint8_t cmd = data.at(1);
         switch(cmd){
         case(0x03):{
-            uint16_t temp = ((((uint16_t)data.at(3)) << 8) & 0xFF00) | (((uint16_t)data.at(4)) & 0xFF);
-            uint16_t relay = data.at(6);
-            qDebug() << "TEMPERATURE " << temp << " RELAY: " << relay;
-            emit this->siSendTemperature(temp);
+            uint8_t temp_data[4];
+            temp_data[0] = data.at(6); temp_data[1] = data.at(5); temp_data[2] = data.at(4); temp_data[3] = data.at(3);
+            float ftemp = *(reinterpret_cast<float *>(temp_data));
+//            uint16_t temp = ((((uint16_t)data.at(3)) << 8) & 0xFF00) | (((uint16_t)data.at(4)) & 0xFF);
+            uint16_t relay = data.at(8);
+            qDebug() << "TEMPERATURE " << ftemp << " RELAY: " << relay;
+            emit this->siSendTemperature(ftemp);
             emit this->siSendRelay(relay);
             this->ConnectionOK = true;
             emit this->siConnected();
             break;
         }
         case(0x10):{
-            if ((((uint16_t)data.at(4) << 8) | (uint16_t)data.at(5)) == 3){
+            if ((((uint16_t)data.at(4) << 8) | (uint16_t)data.at(5)) == 4){
                 qDebug() << "WRITE OK";
             }
             else{
@@ -425,7 +428,7 @@ void OVEN_Heater::C_ReadTemperatureRelay(void){
         0x03,
         (uint8_t)(this->temperature_addr >> 8),
         (uint8_t)(this->temperature_addr),
-        0x00, 0x02,
+        0x00, 0x03,
         0, 0
     };
     uint16_t crc = this->crc16(data_to_send, 6);
@@ -438,28 +441,30 @@ void OVEN_Heater::C_ReadTemperatureRelay(void){
         stream << data_to_send[iter];
 
     qDebug() << b_arr;
-    this->serial_queue.push_back(Pack(b_arr, 9));
+    this->serial_queue.push_back(Pack(b_arr, 11));
 }
 
 void OVEN_Heater::C_WritePIDEnableSetPoint(void){
-    uint8_t data_to_send[15] = {
+    uint8_t * cast_data = reinterpret_cast<uint8_t *>(&(this->setpoint));
+    uint8_t data_to_send[17] = {
         this->slave_addr,
         0x10,
         (uint8_t)(this->pid_addr >> 8), (uint8_t)(this->pid_addr),
-        0x00, 0x03,
-        0x06,
+        0x00, 0x04,
+        0x08,
         (uint8_t)(this->pid >> 8), (uint8_t)(this->pid),
         (uint8_t)(this->enable >> 8), (uint8_t)(this->enable),
-        (uint8_t)(this->setpoint >> 8), (uint8_t)(this->setpoint),
+        cast_data[3], cast_data[2], cast_data[1], cast_data[0],
+//        (uint8_t)(this->setpoint >> 8), (uint8_t)(this->setpoint),
         0, 0
     };
-    uint16_t crc = this->crc16(data_to_send, 13);
-    data_to_send[13] = crc;
-    data_to_send[14] = crc >> 8;
+    uint16_t crc = this->crc16(data_to_send, 15);
+    data_to_send[15] = crc;
+    data_to_send[16] = crc >> 8;
     QByteArray b_arr;
     QDataStream stream(&b_arr, QIODevice::WriteOnly);
     stream.setByteOrder(QDataStream::LittleEndian);
-    for (uint16_t iter = 0; iter < 15; iter++)
+    for (uint16_t iter = 0; iter < 17; iter++)
         stream << data_to_send[iter];
 
     qDebug() << b_arr;

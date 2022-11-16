@@ -84,7 +84,7 @@ signals:
     void siStopped(void);
     void siSendEnable(uint16_t enb);
     void siSendPID(uint16_t PID);
-    void siSendSetPoint(uint16_t sp);
+    void siSendSetPoint(float sp);
 };
 
 #endif // PROFILEHEAT_H

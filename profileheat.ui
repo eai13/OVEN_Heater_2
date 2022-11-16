@@ -36,7 +36,7 @@
       </font>
      </property>
      <property name="title">
-      <string>Profile</string>
+      <string>График Профиля Нагрева</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -64,7 +64,7 @@
       </font>
      </property>
      <property name="title">
-      <string>Real</string>
+      <string>График Измеряемой Температуры</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -105,7 +105,7 @@
       </font>
      </property>
      <property name="title">
-      <string>Profile Heat Mode</string>
+      <string>Режим Профильного Нагрева</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -133,7 +133,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Launch The Experiment</string>
+         <string>Запустить Эксперимент</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -178,7 +178,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Stop</string>
+         <string>Стоп</string>
         </property>
        </widget>
       </item>
@@ -206,7 +206,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Relay</string>
+           <string>Реле</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -264,7 +264,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Is Running</string>
+           <string>Запущено</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -350,7 +350,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Profile Points Setup</string>
+         <string>Задание Профиля</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -379,7 +379,7 @@
          </font>
         </property>
         <property name="placeholderText">
-         <string>Starting Temperature, C</string>
+         <string>Пусковая Температура, C</string>
         </property>
        </widget>
       </item>
@@ -437,7 +437,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Set Starting Point</string>
+         <string>Задать</string>
         </property>
        </widget>
       </item>
@@ -463,7 +463,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Run</string>
+         <string>Пуск</string>
         </property>
        </widget>
       </item>
@@ -491,7 +491,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Add Point</string>
+           <string>Добавить</string>
           </property>
          </widget>
         </item>
@@ -517,7 +517,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Remove Point</string>
+           <string>Удалить</string>
           </property>
          </widget>
         </item>
@@ -545,7 +545,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Starting Temperature Setup</string>
+         <string>Пусковая Температура</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -574,7 +574,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Clear Profile</string>
+         <string>Очистить Профиль</string>
         </property>
        </widget>
       </item>
@@ -600,7 +600,7 @@
          </font>
         </property>
         <property name="placeholderText">
-         <string>Point Speed, C/min</string>
+         <string>Скорость, C/мин</string>
         </property>
        </widget>
       </item>
@@ -626,7 +626,7 @@
          </font>
         </property>
         <property name="placeholderText">
-         <string>Point Temperature, C</string>
+         <string>Температура, C</string>
         </property>
        </widget>
       </item>
@@ -665,7 +665,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Actual Value, C</string>
+         <string>Температура, C</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>

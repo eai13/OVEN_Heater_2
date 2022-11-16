@@ -87,14 +87,14 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_STATE_FULL_BLOCK);
 
     this->profile_plot_menu = new QMenu;
-    this->profile_plot_menu->addAction("Save Image", this, &ProfileHeat::slSaveProfileImage);
-    this->profile_plot_menu->addAction("Save Data", this, &ProfileHeat::slSaveProfileData);
-    this->profile_plot_menu->addAction("Save All", this, &ProfileHeat::slSaveAll);
+    this->profile_plot_menu->addAction("Сохранить График", this, &ProfileHeat::slSaveProfileImage);
+    this->profile_plot_menu->addAction("Сохранить Данные", this, &ProfileHeat::slSaveProfileData);
+    this->profile_plot_menu->addAction("Сохранить Все", this, &ProfileHeat::slSaveAll);
 
     this->real_plot_menu = new QMenu;
-    this->real_plot_menu->addAction("Save Image", this, &ProfileHeat::slSaveRealImage);
-    this->real_plot_menu->addAction("Save Data", this, &ProfileHeat::slSaveRealData);
-    this->real_plot_menu->addAction("Save All", this, &ProfileHeat::slSaveAll);
+    this->real_plot_menu->addAction("Сохранить График", this, &ProfileHeat::slSaveRealImage);
+    this->real_plot_menu->addAction("Сохранить Данные", this, &ProfileHeat::slSaveRealData);
+    this->real_plot_menu->addAction("Сохранить Все", this, &ProfileHeat::slSaveAll);
 
     ui->widget_profileplot->setContextMenuPolicy(Qt::CustomContextMenu);
     ui->widget_realplot->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -104,8 +104,8 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
     connect(ui->widget_profileplot, &QWidget::customContextMenuRequested, this, &ProfileHeat::slShowProfilePlotMenu);
     connect(ui->widget_realplot, &QWidget::customContextMenuRequested, this, &ProfileHeat::slShowRealPlotMenu);
 
-    ui->widget_profileplot->xAxis->setLabel("Time, s");
-    ui->widget_profileplot->yAxis->setLabel("Temperature, C");
+    ui->widget_profileplot->xAxis->setLabel("Время, с");
+    ui->widget_profileplot->yAxis->setLabel("Температура, C");
     ui->widget_profileplot->addGraph()->setPen(QPen(Qt::red));
 
     if (!(from_file.isEmpty())){
@@ -137,8 +137,8 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
         }
     }
 
-    ui->widget_realplot->xAxis->setLabel("Time, s");
-    ui->widget_realplot->yAxis->setLabel("Temperature, C");
+    ui->widget_realplot->xAxis->setLabel("Время, с");
+    ui->widget_realplot->yAxis->setLabel("Температура, C");
     ui->widget_realplot->addGraph()->setPen(QPen(Qt::red));
 
     connect(ui->pushbutton_setstarttemp, &QPushButton::released, this, &ProfileHeat::slSetStartingTemperature);
@@ -264,7 +264,7 @@ void ProfileHeat::slSaveRealImage(void){
     QString filter;
     QString filename = QFileDialog::getSaveFileName(
                 this,
-                "Save Plot Image To...",
+                "Сохранить График...",
                 ".",
                 "PNG (*.png);;JPG (*.jpg);;BMP (*.bmp)",
                 &filter);
@@ -285,7 +285,7 @@ void ProfileHeat::slSaveRealData(void){
     QString filter;
     QString filename = QFileDialog::getSaveFileName(
                 this,
-                "Save Plot Data To...",
+                "Сохранить Данные...",
                 ".",
                 "CSV (*.csv)",
                 &filter);
@@ -295,7 +295,7 @@ void ProfileHeat::slSaveRealData(void){
         QFile file(filename);
         if (file.open(QIODevice::WriteOnly)){
             QTextStream stream(&file);
-            stream << "Time, s;Temperature, C" << endl;
+            stream << "Время, с;Температура, C" << endl;
             QSharedPointer<QCPGraphDataContainer> datacontainer = ui->widget_realplot->graph(0)->data();
             for (auto iter = datacontainer->begin(); iter != datacontainer->end(); iter++){
                 QString tmp_value = QString::asprintf("%.2f", iter->value);
@@ -312,7 +312,7 @@ void ProfileHeat::slSaveProfileImage(void){
     QString filter;
     QString filename = QFileDialog::getSaveFileName(
                 this,
-                "Save Plot Image To...",
+                "Сохранить Изображение...",
                 ".",
                 "PNG (*.png);;JPG (*.jpg);;BMP (*.bmp)",
                 &filter);
@@ -333,7 +333,7 @@ void ProfileHeat::slSaveProfileData(void){
     QString filter;
     QString filename = QFileDialog::getSaveFileName(
                 this,
-                "Save Plot Data To...",
+                "Сохранить Данные...",
                 ".",
                 "CSV (*.csv)",
                 &filter);
@@ -343,7 +343,7 @@ void ProfileHeat::slSaveProfileData(void){
         QFile file(filename);
         if (file.open(QIODevice::WriteOnly)){
             QTextStream stream(&file);
-            stream << "Time, s;Temperature, C" << endl;
+            stream << "Время, с;Температура, C" << endl;
             QSharedPointer<QCPGraphDataContainer> datacontainer = ui->widget_profileplot->graph(0)->data();
             for (auto iter = datacontainer->begin(); iter != datacontainer->end(); iter++){
                 QString tmp_value = QString::asprintf("%.2f", iter->value);
@@ -360,7 +360,7 @@ void ProfileHeat::slSaveAll(void){
     QString filter;
     QString filename = QFileDialog::getSaveFileName(
                 this,
-                "Save Experiment Data To...",
+                "Сохранить Данные Эксперимента...",
                 ".",
                 "PNG CSV_Comma;;JPG CSV_Comma;;BMP CSV_Comma",
                 &filter);
@@ -427,7 +427,11 @@ void ProfileHeat::slSetStartingTemperature(void){
 
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_START_TEMP_SET);
 
-    this->profile_lookup_table.push_back(QPointF(0, ui->lineedit_starttemp->text().toDouble()));
+    QString temp = ui->lineedit_starttemp->text();
+    for (auto iter = temp.begin(); iter != temp.end(); iter++)
+        if (*iter == ',') *iter = '.';
+
+    this->profile_lookup_table.push_back(QPointF(0, temp.toDouble()));
     ui->widget_profileplot->graph(0)->addData(0, ui->lineedit_starttemp->text().toDouble());
     ui->widget_profileplot->rescaleAxes();
     ui->widget_profileplot->yAxis->setRangeLower(0);
@@ -543,32 +547,32 @@ void ProfileHeat::slConnected(void){
 void ProfileHeat::slEditFinishedSpeed(void){
     qWarning() << "EDIT FINISHED SPEED";
     if (ui->lineedit_pointspeed->text().isEmpty()){
-        ui->lineedit_pointtemp->setPlaceholderText("Point Temperature, C");
+        ui->lineedit_pointtemp->setPlaceholderText("Температура, C");
         return;
     }
     QString speed_text = ui->lineedit_pointspeed->text();
     for (auto iter = speed_text.begin(); iter != speed_text.end(); iter++)
         if (*iter == ',') *iter = '.';
     if (std::abs(speed_text.toFloat() - 0) < 0.00001){
-        ui->lineedit_pointtemp->setPlaceholderText("Plane Time, min");
+        ui->lineedit_pointtemp->setPlaceholderText("Время Поддержания, мин");
     }
     else{
-        ui->lineedit_pointtemp->setPlaceholderText("Point Temperature, C");
+        ui->lineedit_pointtemp->setPlaceholderText("Температура, C");
     }
 }
 void ProfileHeat::slEditFinishedTemp(void){
     qWarning() << "EDIT FINISHED TEMP";
     if (ui->lineedit_pointtemp->text().isEmpty()){
-        ui->lineedit_pointspeed->setPlaceholderText("Point Speed, C/min");
+        ui->lineedit_pointspeed->setPlaceholderText("Скорость, C/мин");
         return;
     }
     QString temp_text = ui->lineedit_pointtemp->text();
     for (auto iter = temp_text.begin(); iter != temp_text.end(); iter++)
         if (*iter == ',') *iter = '.';
     if (std::abs(temp_text.toFloat() - this->profile_lookup_table.back().y()) < 0.0001){
-        ui->lineedit_pointspeed->setPlaceholderText("Plane Time, min");
+        ui->lineedit_pointspeed->setPlaceholderText("Время Поддержания, мин");
     }
     else{
-        ui->lineedit_pointspeed->setPlaceholderText("Point Speed, C/min");
+        ui->lineedit_pointspeed->setPlaceholderText("Скорость, C/мин");
     }
 }

@@ -63,7 +63,7 @@ public slots:
 signals:
     void siSendEnable(uint16_t enb);
     void siSendPID(uint16_t PID);
-    void siSendSetPoint(uint16_t sp);
+    void siSendSetPoint(float sp);
     void siStarted(void);
     void siStopped(void);
 };

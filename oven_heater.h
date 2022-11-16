@@ -53,7 +53,8 @@ private:
     uint16_t enable_addr;
     uint16_t enable = 0;
     uint16_t setpoint_addr;
-    uint16_t setpoint = 0;
+
+    float setpoint = 0;
 
     int baudrate;
 
@@ -96,7 +97,7 @@ public slots:
     void slReceivePID(uint16_t PID){
         this->pid = PID;
     }
-    void slReceiveSetPoint(uint16_t sp){
+    void slReceiveSetPoint(float sp){
         this->setpoint = sp;
     }
 

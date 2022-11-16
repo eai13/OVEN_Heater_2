@@ -48,7 +48,7 @@
       </font>
      </property>
      <property name="title">
-      <string>MODBUS Settings</string>
+      <string>Настройки MODBUS</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
@@ -76,7 +76,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Slave Address</string>
+         <string>Адрес Устройства</string>
         </property>
        </widget>
       </item>
@@ -108,7 +108,7 @@
          <bool>true</bool>
         </property>
         <property name="placeholderText">
-         <string>Decimal Number 0-127</string>
+         <string>Десятичное Значение 0-127</string>
         </property>
        </widget>
       </item>
@@ -134,7 +134,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Temperature Register Address</string>
+         <string>Адрес Регистра Температуры</string>
         </property>
        </widget>
       </item>
@@ -160,7 +160,7 @@
          </font>
         </property>
         <property name="placeholderText">
-         <string>Decimal Number 0-65535</string>
+         <string>Десятичное Значение 0-65535</string>
         </property>
        </widget>
       </item>
@@ -186,7 +186,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Relay Register Address</string>
+         <string>Адрес Регистра Реле</string>
         </property>
        </widget>
       </item>
@@ -212,7 +212,7 @@
          </font>
         </property>
         <property name="placeholderText">
-         <string>Decimal Number 0-65535</string>
+         <string>Десятичное Значение 0-65535</string>
         </property>
        </widget>
       </item>
@@ -238,7 +238,7 @@
          </font>
         </property>
         <property name="text">
-         <string>PID Register Address</string>
+         <string>Адрес Регистра PID-регулятора</string>
         </property>
        </widget>
       </item>
@@ -264,7 +264,7 @@
          </font>
         </property>
         <property name="placeholderText">
-         <string>Decimal Number 0-65535</string>
+         <string>Десятичное Значение 0-65535</string>
         </property>
        </widget>
       </item>
@@ -290,7 +290,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Enable Register Address</string>
+         <string>Адрес Регистра Разрешения</string>
         </property>
        </widget>
       </item>
@@ -316,7 +316,7 @@
          </font>
         </property>
         <property name="placeholderText">
-         <string>Decimal Number 0-65535</string>
+         <string>Десятичное Значение 0-65535</string>
         </property>
        </widget>
       </item>
@@ -342,7 +342,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Setpoint Register Address</string>
+         <string>Адрес Регистра Уставки</string>
         </property>
        </widget>
       </item>
@@ -368,7 +368,7 @@
          </font>
         </property>
         <property name="placeholderText">
-         <string>Decimal Number 0-65535</string>
+         <string>Десятичное Значение 0-65535</string>
         </property>
        </widget>
       </item>
@@ -396,7 +396,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Apply</string>
+           <string>Принять</string>
           </property>
          </widget>
         </item>
@@ -422,7 +422,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Close</string>
+           <string>Закрыть</string>
           </property>
          </widget>
         </item>

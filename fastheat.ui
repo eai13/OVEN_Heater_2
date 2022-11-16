@@ -36,7 +36,7 @@
       </font>
      </property>
      <property name="title">
-      <string>Fast Heat Mode</string>
+      <string>Режим Быстрого Нагрева</string>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
       <item>
@@ -61,7 +61,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Set Point, C</string>
+         <string>Уставка, C</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -90,7 +90,7 @@
          </font>
         </property>
         <property name="placeholderText">
-         <string>Temperature, C</string>
+         <string>Температура, C</string>
         </property>
        </widget>
       </item>
@@ -116,7 +116,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Run</string>
+         <string>Пуск</string>
         </property>
        </widget>
       </item>
@@ -142,7 +142,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Stop</string>
+         <string>Стоп</string>
         </property>
        </widget>
       </item>
@@ -184,7 +184,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Actual Temperature, C</string>
+         <string>Температура, C</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -238,7 +238,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Relay</string>
+           <string>Реле</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -299,7 +299,7 @@
            </font>
           </property>
           <property name="text">
-           <string>Is Running</string>
+           <string>Запущено</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -375,7 +375,7 @@
       </font>
      </property>
      <property name="title">
-      <string>Real</string>
+      <string>График Температуры</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
       <item row="0" column="0">
