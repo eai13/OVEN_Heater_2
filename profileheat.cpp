@@ -142,11 +142,14 @@ ProfileHeat::ProfileHeat(QString from_file, QWidget *parent) : QWidget(parent), 
     ui->widget_realplot->addGraph()->setPen(QPen(Qt::red));
 
     connect(ui->pushbutton_setstarttemp, &QPushButton::released, this, &ProfileHeat::slSetStartingTemperature);
+    connect(ui->lineedit_starttemp, &QLineEdit::returnPressed, this, &ProfileHeat::slSetStartingTemperature);
     connect(ui->pushbutton_addpoint, &QPushButton::released, this, &ProfileHeat::slAddProfilePoint);
     connect(ui->pushbutton_removepoint, &QPushButton::released, this, &ProfileHeat::slRemoveProfilePoint);
     connect(ui->pushbutton_clearpoints, &QPushButton::released, this, &ProfileHeat::slClearProfile);
     connect(ui->lineedit_pointtemp, &QLineEdit::textEdited, this, &ProfileHeat::slEditFinishedTemp);
+    connect(ui->lineedit_pointtemp, &QLineEdit::returnPressed, this, &ProfileHeat::slAddProfilePoint);
     connect(ui->lineedit_pointspeed, &QLineEdit::textEdited, this, &ProfileHeat::slEditFinishedSpeed);
+    connect(ui->lineedit_pointspeed, &QLineEdit::returnPressed, this, &ProfileHeat::slAddProfilePoint);
 
     this->global_time = new QTime;
     this->run_timer = new QTimer;

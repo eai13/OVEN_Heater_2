@@ -180,6 +180,9 @@
         <property name="text">
          <string>Стоп</string>
         </property>
+        <property name="shortcut">
+         <string>Ctrl+Shift+S</string>
+        </property>
        </widget>
       </item>
       <item row="17" column="3">
@@ -465,6 +468,9 @@
         <property name="text">
          <string>Пуск</string>
         </property>
+        <property name="shortcut">
+         <string>Ctrl+Shift+R</string>
+        </property>
        </widget>
       </item>
       <item row="7" column="3">
@@ -576,6 +582,9 @@
         <property name="text">
          <string>Очистить Профиль</string>
         </property>
+        <property name="shortcut">
+         <string>Ctrl+Shift+C</string>
+        </property>
        </widget>
       </item>
       <item row="6" column="3">
@@ -685,6 +694,17 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>lineedit_starttemp</tabstop>
+  <tabstop>pushbutton_setstarttemp</tabstop>
+  <tabstop>lineedit_pointtemp</tabstop>
+  <tabstop>lineedit_pointspeed</tabstop>
+  <tabstop>pushbutton_addpoint</tabstop>
+  <tabstop>pushbutton_removepoint</tabstop>
+  <tabstop>pushbutton_clearpoints</tabstop>
+  <tabstop>pushbutton_run</tabstop>
+  <tabstop>pushbutton_stop</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

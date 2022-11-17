@@ -54,6 +54,7 @@ FastHeat::FastHeat(QWidget *parent) : QWidget(parent), ui(new Ui::FastHeat){
     connect(ui->pushbutton_run, &QPushButton::released, this, &FastHeat::slRun);
     connect(ui->pushbutton_stop, &QPushButton::released, this, &FastHeat::slStop);
     connect(ui->widget_realplot, &QWidget::customContextMenuRequested, this, &FastHeat::slShowPlotMenu);
+    connect(ui->lineedit_setpoint, &QLineEdit::returnPressed, this, &FastHeat::slRun);
 
     ui->widget_realplot->xAxis->setLabel("Время, с");
     ui->widget_realplot->yAxis->setLabel("Температура, C");
@@ -99,10 +100,10 @@ void FastHeat::SetRunningLabel(bool state){
 }
 
 void FastHeat::slRun(void){
-    emit this->siStarted();
-
     if (ui->lineedit_setpoint->text().isEmpty()) return;
     this->GUISetEnabled(GUI_ENABLE_STATE::ENB_RUN);
+
+    emit this->siStarted();
 
     ui->widget_realplot->graph(0)->data()->clear();
     ui->widget_realplot->rescaleAxes();

@@ -137,6 +137,9 @@
    <property name="text">
     <string>Загрузить Эксперимент</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+O</string>
+   </property>
   </action>
   <action name="action_fast_heating">
    <property name="checkable">
@@ -147,6 +150,9 @@
    </property>
    <property name="text">
     <string>Быстрый Нагрев</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
    </property>
    <property name="priority">
     <enum>QAction::NormalPriority</enum>
@@ -161,6 +167,9 @@
    </property>
    <property name="text">
     <string>Профильный Нагрев</string>
+   </property>
+   <property name="shortcut">
+    <string>F2</string>
    </property>
    <property name="priority">
     <enum>QAction::NormalPriority</enum>
@@ -185,10 +194,16 @@
    <property name="text">
     <string>Сохранить Эксперимент как ...</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+S</string>
+   </property>
   </action>
   <action name="action_exit">
    <property name="text">
     <string>Выйти</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+W</string>
    </property>
   </action>
  </widget>
