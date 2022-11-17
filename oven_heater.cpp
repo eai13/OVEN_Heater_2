@@ -393,9 +393,8 @@ void OVEN_Heater::slSerialRxProcess(void){
         switch(cmd){
         case(0x03):{
             uint8_t temp_data[4];
-            temp_data[0] = data.at(6); temp_data[1] = data.at(5); temp_data[2] = data.at(4); temp_data[3] = data.at(3);
+            temp_data[0] = data.at(4); temp_data[1] = data.at(3); temp_data[2] = data.at(6); temp_data[3] = data.at(5);
             float ftemp = *(reinterpret_cast<float *>(temp_data));
-//            uint16_t temp = ((((uint16_t)data.at(3)) << 8) & 0xFF00) | (((uint16_t)data.at(4)) & 0xFF);
             uint16_t relay = data.at(8);
             qDebug() << "TEMPERATURE " << ftemp << " RELAY: " << relay;
             emit this->siSendTemperature(ftemp);
@@ -454,8 +453,7 @@ void OVEN_Heater::C_WritePIDEnableSetPoint(void){
         0x08,
         (uint8_t)(this->pid >> 8), (uint8_t)(this->pid),
         (uint8_t)(this->enable >> 8), (uint8_t)(this->enable),
-        cast_data[3], cast_data[2], cast_data[1], cast_data[0],
-//        (uint8_t)(this->setpoint >> 8), (uint8_t)(this->setpoint),
+        cast_data[1], cast_data[0], cast_data[3], cast_data[2],
         0, 0
     };
     uint16_t crc = this->crc16(data_to_send, 15);
