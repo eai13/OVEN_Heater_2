@@ -64,12 +64,12 @@ OVEN_Heater::OVEN_Heater(QWidget *parent) : QMainWindow(parent), ui(new Ui::OVEN
         QJsonObject modbus_config_obj;
         modbus_config_obj.insert(SLAVE_ADDR, 1);
         modbus_config_obj.insert(TEMP_ADDR, 0);
-        modbus_config_obj.insert(RELAY_ADDR, 1);
-        modbus_config_obj.insert(PID_ADDR, 2);
-        modbus_config_obj.insert(ENABLE_ADDR, 3);
-        modbus_config_obj.insert(SETPOINT_ADDR, 4);
+        modbus_config_obj.insert(RELAY_ADDR, 2);
+        modbus_config_obj.insert(PID_ADDR, 3);
+        modbus_config_obj.insert(ENABLE_ADDR, 4);
+        modbus_config_obj.insert(SETPOINT_ADDR, 5);
         QJsonObject serial_config_obj;
-        serial_config_obj.insert(BAUDRATE_VAL, 9600);
+        serial_config_obj.insert(BAUDRATE_VAL, 115200);
         QJsonObject main_obj;
         main_obj.insert(MODBUS_CONFIG, modbus_config_obj);
         main_obj.insert(SERIAL_CONFIG, serial_config_obj);

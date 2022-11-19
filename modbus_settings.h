@@ -21,6 +21,11 @@ private:
 private slots:
     void slApply(void);
     void slCancel(void);
+    void slUpdateRegsRealTemp(void);
+    void slUpdateRegsRelay(void);
+    void slUpdateRegsPID(void);
+    void slUpdateRegsEnable(void);
+    void slUpdateRegsSetpoint(void);
 
 signals:
     void siSendNewParameters(uint8_t address, uint16_t tempaddr, uint16_t relayaddr, uint16_t pidaddr, uint16_t enanbleaddr, uint16_t setpointaddr);
